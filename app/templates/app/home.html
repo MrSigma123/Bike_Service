@@ -1,0 +1,40 @@
+{% extends "app/base.html" %}
+
+{% block title %}Strona główna{% endblock title %}
+
+{% block content %}
+<h2>Strona główna</h2>
+
+<div class="box">
+    <p>To jest prosta wersja projektu na przedmiot <strong>Rozwiązania Szkieletowe</strong>.</p>
+    <p>Projekt pokazuje podstawy MVT w Django:</p>
+    <ul>
+        <li><strong>Model</strong> - plik <code>app/models.py</code></li>
+        <li><strong>View</strong> - plik <code>app/views.py</code></li>
+        <li><strong>Template</strong> - pliki w <code>app/templates/app/</code></li>
+    </ul>
+</div>
+
+<h3>Ostatnie zgłoszenia</h3>
+
+{% if ostatnie_zgloszenia %}
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Klient</th>
+        <th>Rower</th>
+        <th>Status</th>
+    </tr>
+    {% for zgloszenie in ostatnie_zgloszenia %}
+    <tr>
+        <td>{{ zgloszenie.id }}</td>
+        <td>{{ zgloszenie.klient.imie }} {{ zgloszenie.klient.nazwisko }}</td>
+        <td>{{ zgloszenie.rower.marka }} {{ zgloszenie.rower.model }}</td>
+        <td>{{ zgloszenie.status }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>Brak zgłoszeń w bazie danych.</p>
+{% endif %}
+{% endblock content %}

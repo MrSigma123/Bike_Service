@@ -1,58 +1,165 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 
-class User(AbstractUser):
+
+class Uzytkownik(models.Model):
     ROLE_CHOICES = [
-        ('client', 'Klient'),
-        ('mechanic', 'Mechanik'),
-        ('warehouse', 'Magazynier'),
-        ('admin', 'Administrator'),
+        ('klient', 'Klient'),
+        ('mechanik', 'Mechanik'),
+        ('admin', 'Admin'),
     ]
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+
+    imie = models.CharField(max_length=50)
+    nazwisko = models.CharField(max_length=50)
+    email = models.EmailField(max_length=100, unique=True)
+    login = models.CharField(max_length=50, unique=True)
+    haslo = models.CharField(max_length=255)
+    rola = models.CharField(max_length=20, choices=ROLE_CHOICES)
+
+    class Meta:
+        ordering = ['nazwisko', 'imie']
+
+    def __str__(self):
+        return f'{self.imie} {self.nazwisko}'
 
 
-class RepairRequest(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    description = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+class Rower(models.Model):
+    klient = models.ForeignKey(Uzytkownik, on_delete=models.CASCADE, related_name='rowery')
+    marka = models.CharField(max_length=50)
+    model = models.CharField(max_length=50)
+    typ = models.CharField(max_length=50)
+    numer_seryjny = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        ordering = ['marka', 'model']
+
+    def __str__(self):
+        return f'{self.marka} {self.model}'
 
 
-class ServiceOrder(models.Model):
+class Zgloszenie(models.Model):
     STATUS_CHOICES = [
-        ('new', 'Nowe'),
-        ('diagnosis', 'Diagnoza'),
-        ('in_progress', 'W trakcie'),
-        ('done', 'Zakończone'),
+        ('nowe', 'Nowe'),
+        ('w_trakcie', 'W trakcie'),
+        ('zakonczone', 'Zakończone'),
     ]
 
-    request = models.OneToOneField(RepairRequest, on_delete=models.CASCADE)
-    mechanic = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    klient = models.ForeignKey(Uzytkownik, on_delete=models.CASCADE, related_name='zgloszenia')
+    rower = models.ForeignKey(Rower, on_delete=models.CASCADE, related_name='zgloszenia')
+    data_zgloszenia = models.DateTimeField(auto_now_add=True)
+    opis_usterki = models.TextField()
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='nowe')
+
+    class Meta:
+        ordering = ['-data_zgloszenia']
+
+    def __str__(self):
+        return f'Zgłoszenie {self.id}'
 
 
-class Diagnosis(models.Model):
-    order = models.OneToOneField(ServiceOrder, on_delete=models.CASCADE)
-    description = models.TextField()
+class ZlecenieSerwisowe(models.Model):
+    STATUS_CHOICES = [
+        ('przyjete', 'Przyjęte'),
+        ('diagnoza', 'Diagnoza'),
+        ('naprawa', 'Naprawa'),
+        ('gotowe', 'Gotowe'),
+        ('wydane', 'Wydane'),
+    ]
+
+    zgloszenie = models.ForeignKey(Zgloszenie, on_delete=models.CASCADE, related_name='zlecenia')
+    mechanik = models.ForeignKey(
+        Uzytkownik,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='zlecenia_mechanika',
+    )
+    data_przyjecia = models.DateTimeField(auto_now_add=True)
+    data_zakonczenia = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='przyjete')
+
+    class Meta:
+        ordering = ['-data_przyjecia']
+
+    def __str__(self):
+        return f'Zlecenie {self.id}'
 
 
-class RepairReport(models.Model):
-    order = models.OneToOneField(ServiceOrder, on_delete=models.CASCADE)
-    description = models.TextField()
+class Diagnoza(models.Model):
+    zlecenie = models.ForeignKey(ZlecenieSerwisowe, on_delete=models.CASCADE, related_name='diagnozy')
+    opis_diagnozy = models.TextField()
+    data_diagnozy = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Diagnoza {self.id}'
 
 
-class Part(models.Model):
-    name = models.CharField(max_length=100)
-    quantity = models.IntegerField()
-    min_quantity = models.IntegerField()
+class RaportNaprawy(models.Model):
+    zlecenie = models.ForeignKey(ZlecenieSerwisowe, on_delete=models.CASCADE, related_name='raporty')
+    opis_czynnosci = models.TextField()
+    data_raportu = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Raport {self.id}'
 
 
-class UsedPart(models.Model):
-    order = models.ForeignKey(ServiceOrder, on_delete=models.CASCADE)
-    part = models.ForeignKey(Part, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
+class Czesc(models.Model):
+    nazwa = models.CharField(max_length=100)
+    stan_magazynowy = models.IntegerField(default=0)
+    stan_minimalny = models.IntegerField(default=0)
+    cena = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        ordering = ['nazwa']
+
+    def __str__(self):
+        return self.nazwa
 
 
-class Notification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    message = models.TextField()
-    is_read = models.BooleanField(default=False)
+class ZuzytaCzesc(models.Model):
+    zlecenie = models.ForeignKey(ZlecenieSerwisowe, on_delete=models.CASCADE, related_name='zuzyte_czesci')
+    czesc = models.ForeignKey(Czesc, on_delete=models.CASCADE, related_name='zuzycia')
+    ilosc = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f'{self.czesc} x {self.ilosc}'
+
+
+class Powiadomienie(models.Model):
+    uzytkownik = models.ForeignKey(Uzytkownik, on_delete=models.CASCADE, related_name='powiadomienia')
+    zlecenie = models.ForeignKey(ZlecenieSerwisowe, on_delete=models.CASCADE, related_name='powiadomienia')
+    tresc = models.TextField()
+    data_wyslania = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Powiadomienie {self.id}'
+
+
+class Magazyn(models.Model):
+    TYP_CHOICES = [
+        ('przyjecie', 'Przyjęcie'),
+        ('wydanie', 'Wydanie'),
+    ]
+
+    czesc = models.ForeignKey(Czesc, on_delete=models.CASCADE, related_name='operacje_magazynowe')
+    ilosc = models.IntegerField()
+    typ_operacji = models.CharField(max_length=20, choices=TYP_CHOICES)
+    data_operacji = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.typ_operacji} - {self.czesc}'
+
+
+class Platnosc(models.Model):
+    STATUS_CHOICES = [
+        ('oczekuje', 'Oczekuje'),
+        ('oplacona', 'Opłacona'),
+        ('anulowana', 'Anulowana'),
+    ]
+
+    zlecenie = models.ForeignKey(ZlecenieSerwisowe, on_delete=models.CASCADE, related_name='platnosci')
+    kwota = models.DecimalField(max_digits=10, decimal_places=2)
+    data_platnosci = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='oczekuje')
+
+    def __str__(self):
+        return f'Płatność {self.id}'
