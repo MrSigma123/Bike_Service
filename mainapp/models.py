@@ -16,7 +16,8 @@ class Uzytkownik(models.Model):
     rola = models.CharField(max_length=20, choices=ROLE_CHOICES)
 
     class Meta:
-        ordering = ['nazwisko', 'imie']
+        verbose_name = 'Użytkownik'
+        verbose_name_plural = 'Użytkownicy'
 
     def __str__(self):
         return f'{self.imie} {self.nazwisko}'
@@ -30,7 +31,8 @@ class Rower(models.Model):
     numer_seryjny = models.CharField(max_length=100, unique=True)
 
     class Meta:
-        ordering = ['marka', 'model']
+        verbose_name = 'Rower'
+        verbose_name_plural = 'Rowery'
 
     def __str__(self):
         return f'{self.marka} {self.model}'
@@ -50,10 +52,11 @@ class Zgloszenie(models.Model):
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='nowe')
 
     class Meta:
-        ordering = ['-data_zgloszenia']
+        verbose_name = 'Zgłoszenie'
+        verbose_name_plural = 'Zgłoszenia'
 
     def __str__(self):
-        return f'Zgłoszenie {self.id}'
+        return f'Zgłoszenie #{self.id}'
 
 
 class ZlecenieSerwisowe(models.Model):
@@ -62,26 +65,20 @@ class ZlecenieSerwisowe(models.Model):
         ('diagnoza', 'Diagnoza'),
         ('naprawa', 'Naprawa'),
         ('gotowe', 'Gotowe'),
-        ('wydane', 'Wydane'),
     ]
 
     zgloszenie = models.ForeignKey(Zgloszenie, on_delete=models.CASCADE, related_name='zlecenia')
-    mechanik = models.ForeignKey(
-        Uzytkownik,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='zlecenia_mechanika',
-    )
+    mechanik = models.ForeignKey(Uzytkownik, on_delete=models.SET_NULL, null=True, blank=True, related_name='zlecenia_mechanika')
     data_przyjecia = models.DateTimeField(auto_now_add=True)
     data_zakonczenia = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='przyjete')
 
     class Meta:
-        ordering = ['-data_przyjecia']
+        verbose_name = 'Zlecenie serwisowe'
+        verbose_name_plural = 'Zlecenia serwisowe'
 
     def __str__(self):
-        return f'Zlecenie {self.id}'
+        return f'Zlecenie #{self.id}'
 
 
 class Diagnoza(models.Model):
@@ -90,7 +87,7 @@ class Diagnoza(models.Model):
     data_diagnozy = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'Diagnoza {self.id}'
+        return f'Diagnoza #{self.id}'
 
 
 class RaportNaprawy(models.Model):
@@ -99,7 +96,7 @@ class RaportNaprawy(models.Model):
     data_raportu = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'Raport {self.id}'
+        return f'Raport #{self.id}'
 
 
 class Czesc(models.Model):
@@ -109,7 +106,8 @@ class Czesc(models.Model):
     cena = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
-        ordering = ['nazwa']
+        verbose_name = 'Część'
+        verbose_name_plural = 'Części'
 
     def __str__(self):
         return self.nazwa
@@ -131,7 +129,7 @@ class Powiadomienie(models.Model):
     data_wyslania = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'Powiadomienie {self.id}'
+        return f'Powiadomienie #{self.id}'
 
 
 class Magazyn(models.Model):
@@ -162,4 +160,4 @@ class Platnosc(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='oczekuje')
 
     def __str__(self):
-        return f'Płatność {self.id}'
+        return f'Płatność #{self.id}'

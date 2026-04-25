@@ -1,17 +1,8 @@
 from django.contrib import admin
-
 from .models import (
-    Czesc,
-    Diagnoza,
-    Magazyn,
-    Platnosc,
-    Powiadomienie,
-    RaportNaprawy,
-    Rower,
-    Uzytkownik,
-    Zgloszenie,
-    ZlecenieSerwisowe,
-    ZuzytaCzesc,
+    Uzytkownik, Rower, Zgloszenie, ZlecenieSerwisowe,
+    Diagnoza, RaportNaprawy, Czesc, ZuzytaCzesc,
+    Powiadomienie, Magazyn, Platnosc,
 )
 
 admin.site.register(Uzytkownik)

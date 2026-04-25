@@ -2,7 +2,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-projekt-na-zajecia'
+SECRET_KEY = 'django-insecure-studencki-projekt-serwis-rowerowy'
 DEBUG = True
 ALLOWED_HOSTS = []
 
@@ -13,7 +13,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'app',
+    'mainapp',
 ]
 
 MIDDLEWARE = [
