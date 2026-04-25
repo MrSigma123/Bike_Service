@@ -85,7 +85,11 @@ class Diagnoza(models.Model):
     zlecenie = models.ForeignKey(ZlecenieSerwisowe, on_delete=models.CASCADE, related_name='diagnozy')
     opis_diagnozy = models.TextField()
     data_diagnozy = models.DateTimeField(auto_now_add=True)
-
+    
+    class Meta:
+        verbose_name = "Diagnoza"
+        verbose_name_plural = "Diagnozy"
+    
     def __str__(self):
         return f'Diagnoza #{self.id}'
 
@@ -95,6 +99,10 @@ class RaportNaprawy(models.Model):
     opis_czynnosci = models.TextField()
     data_raportu = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = "Raport naprawy"
+        verbose_name_plural = "Raporty napraw"
+        
     def __str__(self):
         return f'Raport #{self.id}'
 
@@ -117,6 +125,10 @@ class ZuzytaCzesc(models.Model):
     zlecenie = models.ForeignKey(ZlecenieSerwisowe, on_delete=models.CASCADE, related_name='zuzyte_czesci')
     czesc = models.ForeignKey(Czesc, on_delete=models.CASCADE, related_name='zuzycia')
     ilosc = models.IntegerField(default=1)
+    
+    class Meta:
+        verbose_name = "Zużyta część"
+        verbose_name_plural = "Zużyte części"
 
     def __str__(self):
         return f'{self.czesc} x {self.ilosc}'
@@ -127,6 +139,10 @@ class Powiadomienie(models.Model):
     zlecenie = models.ForeignKey(ZlecenieSerwisowe, on_delete=models.CASCADE, related_name='powiadomienia')
     tresc = models.TextField()
     data_wyslania = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Powiadomienie"
+        verbose_name_plural = "Powiadomienia"
 
     def __str__(self):
         return f'Powiadomienie #{self.id}'
@@ -143,6 +159,10 @@ class Magazyn(models.Model):
     typ_operacji = models.CharField(max_length=20, choices=TYP_CHOICES)
     data_operacji = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = "Operacja magazynowa"
+        verbose_name_plural = "Magazyn"
+        
     def __str__(self):
         return f'{self.typ_operacji} - {self.czesc}'
 
@@ -153,7 +173,11 @@ class Platnosc(models.Model):
         ('oplacona', 'Opłacona'),
         ('anulowana', 'Anulowana'),
     ]
-
+    
+    class Meta:
+        verbose_name = "Płatność"
+        verbose_name_plural = "Płatności"
+        
     zlecenie = models.ForeignKey(ZlecenieSerwisowe, on_delete=models.CASCADE, related_name='platnosci')
     kwota = models.DecimalField(max_digits=10, decimal_places=2)
     data_platnosci = models.DateTimeField(null=True, blank=True)
