@@ -9,3 +9,15 @@ def home(request):
         'liczba_czesci': Czesc.objects.count(),
     }
     return render(request, 'home.html', context)
+
+def rowery(request):
+    rowery = Rower.objects.all()
+    return render(request, 'rowery.html', {'rowery': rowery})
+
+def zgloszenia(request):
+    zgloszenia = Zgloszenie.objects.all()
+    return render(request, 'zgloszenia.html', {'zgloszenia': zgloszenia})
+
+def czesci(request):
+    czesci = Czesc.objects.all()
+    return render(request, 'czesci.html', {'czesci': czesci})
