@@ -1,0 +1,11 @@
+{% extends "base.html" %} {% block content %}
+<h2>Zgłoszenia</h2>
+
+<ul>
+  {% for z in zgloszenia %}
+  <li>{{ z.opis_usterki }}</li>
+  {% empty %}
+  <li>Brak danych</li>
+  {% endfor %}
+</ul>
+{% endblock %}

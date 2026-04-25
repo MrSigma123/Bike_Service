@@ -1,0 +1,11 @@
+{% extends "base.html" %} {% block content %}
+<h2>Części</h2>
+
+<ul>
+  {% for c in czesci %}
+  <li>{{ c.nazwa }} ({{ c.stan_magazynowy }})</li>
+  {% empty %}
+  <li>Brak danych</li>
+  {% endfor %}
+</ul>
+{% endblock %}
