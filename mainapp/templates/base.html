@@ -5,16 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Serwis rowerowy{% endblock %}</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; background: #f4f4f4; }
-        header, footer { background: #1f2937; color: white; padding: 16px; }
-        main { max-width: 900px; margin: 30px auto; background: white; padding: 24px; border-radius: 10px; }
-        .stats { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 20px; }
-        .card { flex: 1 1 180px; background: #eef2ff; padding: 16px; border-radius: 8px; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f4f4;
+        }
+        
+        header, footer {
+            background: #1f2937;
+            color: white;
+            padding: 16px;
+        }
+        main {
+            max-width: 900px;
+            margin: 30px auto;
+            background: white;
+            padding: 24px;
+            border-radius: 10px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .card {
+            flex: 1 1 180px;
+            background: #eef2ff;
+            padding: 16px;
+            border-radius: 8px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>Your best bike service system</h1>
+            <nav>
+                <a href="{% url 'home' %}">Strona główna</a> |
+                <a href="{% url 'rowery' %}">Rowery</a> |
+                <a href="{% url 'zgloszenia' %}">Zgłoszenia</a> |
+                <a href="{% url 'czesci' %}">Części</a>
+            </nav>
+        <hr>
     </header>
 
     <main>
