@@ -273,3 +273,23 @@ class Dostawca(models.Model):
     def __str__(self):
         return self.nazwa
         
+class ZamowienieCzesci(models.Model):
+    STATUS_CHOICES = [
+        ('nowe', 'Nowe'),
+        ('zamowione', 'Zamówione'),
+        ('dostarczone', 'Dostarczone'),
+        ('anulowane', 'Anulowane'),
+    ]
+
+    dostawca = models.ForeignKey(Dostawca, on_delete=models.CASCADE, related_name='zamowienia')
+    data_zamowienia = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='nowe')
+    uwagi = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = "Zamówienie części"
+        verbose_name_plural = "Zamówienia części"
+
+    def __str__(self):
+        return f"Zamówienie #{self.id} - {self.dostawca}"
+        
