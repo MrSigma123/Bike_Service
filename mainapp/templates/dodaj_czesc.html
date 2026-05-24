@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Dodaj część{% endblock %}
+
+{% block content %}
+<h2>Dodaj część</h2>
+
+<p>Formularz dla magazyniera lub administratora.</p>
+
+<form method="post" class="form-box">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div class="actions">
+        <button type="submit" class="btn">Zapisz część</button>
+        <a href="{% url 'czesci' %}" class="btn">Powrót</a>
+    </div>
+</form>
+{% endblock %}

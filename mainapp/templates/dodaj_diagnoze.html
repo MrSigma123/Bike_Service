@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Dodaj diagnozę{% endblock %}
+
+{% block content %}
+<h2>Dodaj diagnozę</h2>
+
+<p>Formularz dla mechanika. Wybierz zlecenie i wpisz opis diagnozy.</p>
+
+<form method="post" class="form-box">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div class="actions">
+        <button type="submit" class="btn">Zapisz diagnozę</button>
+        <a href="{% url 'zlecenia' %}" class="btn">Powrót</a>
+    </div>
+</form>
+{% endblock %}
