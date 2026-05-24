@@ -205,21 +205,31 @@ def czesci(request):
 
 @login_required
 def dodaj_rower(request):
-    if not czy_ma_role(request, ['klient', 'admin']):
-        messages.error(request, 'Nie masz uprawnień do dodawania roweru.')
+    if not wymagaj_roli(request, ['klient', 'admin'], 'Tylko klient lub admin może dodać rower.'):
         return redirect('home')
+
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
 
     if request.method == 'POST':
         form = RowerForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            rower = form.save(commit=False)
+
+            if uzytkownik.rola == 'klient':
+                rower.klient = uzytkownik
+
+            rower.save()
+            messages.success(request, 'Rower został dodany.')
             return redirect('rowery')
     else:
         form = RowerForm()
 
-    return render(request, 'dodaj_rower.html', {'form': form})
+        if uzytkownik.rola == 'klient':
+            form.fields['klient'].initial = uzytkownik
+            form.fields['klient'].disabled = True
 
+    return render(request, 'dodaj_rower.html', {'form': form})
 
 @login_required
 def dodaj_zgloszenie(request):
