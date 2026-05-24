@@ -318,3 +318,93 @@ def panel_magazyniera(request):
     }
 
     return render(request, 'panel_magazyniera.html', context)
+    
+@login_required
+def zlecenia(request):
+    if not wymagaj_roli(request, ['mechanik', 'admin'], 'Brak dostępu do zleceń.'):
+        return redirect('home')
+
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
+
+    if uzytkownik.rola == 'mechanik':
+        zlecenia = ZlecenieSerwisowe.objects.filter(mechanik=uzytkownik)
+    else:
+        zlecenia = ZlecenieSerwisowe.objects.all()
+
+    return render(request, 'zlecenia.html', {'zlecenia': zlecenia})
+
+
+@login_required
+def przyjmij_zlecenie(request, zlecenie_id):
+    if not wymagaj_roli(request, ['mechanik', 'admin'], 'Tylko mechanik może przyjąć zlecenie.'):
+        return redirect('home')
+
+    zlecenie = get_object_or_404(ZlecenieSerwisowe, id=zlecenie_id)
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
+
+    if uzytkownik.rola == 'mechanik':
+        zlecenie.mechanik = uzytkownik
+
+    zlecenie.status = 'w_realizacji'
+    zlecenie.save()
+
+    messages.success(request, 'Zlecenie zostało przyjęte do realizacji.')
+    return redirect('zlecenia')
+
+
+@login_required
+def dodaj_diagnoze(request):
+    if not wymagaj_roli(request, ['mechanik', 'admin'], 'Tylko mechanik lub admin może dodać diagnozę.'):
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = DiagnozaForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Diagnoza została dodana.')
+            return redirect('zlecenia')
+    else:
+        form = DiagnozaForm()
+
+    return render(request, 'dodaj_diagnoze.html', {'form': form})
+
+
+@login_required
+def dodaj_raport(request):
+    if not wymagaj_roli(request, ['mechanik', 'admin'], 'Tylko mechanik lub admin może dodać raport.'):
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = RaportNaprawyForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Raport naprawy został dodany.')
+            return redirect('zlecenia')
+    else:
+        form = RaportNaprawyForm()
+
+    return render(request, 'dodaj_raport.html', {'form': form})
+
+
+@login_required
+def dodaj_zuzyta_czesc(request):
+    if not wymagaj_roli(request, ['mechanik', 'admin'], 'Tylko mechanik lub admin może rejestrować zużyte części.'):
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = ZuzytaCzescForm(request.POST)
+
+        if form.is_valid():
+            zuzyta_czesc = form.save()
+            czesc = zuzyta_czesc.czesc
+            czesc.stan_magazynowy -= zuzyta_czesc.ilosc
+            czesc.save()
+
+            messages.success(request, 'Zużyta część została zapisana, a stan magazynowy zaktualizowany.')
+            return redirect('zlecenia')
+    else:
+        form = ZuzytaCzescForm()
+
+    return render(request, 'dodaj_zuzyta_czesc.html', {'form': form})
