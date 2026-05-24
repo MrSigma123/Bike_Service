@@ -233,18 +233,30 @@ def dodaj_rower(request):
 
 @login_required
 def dodaj_zgloszenie(request):
-    if not czy_ma_role(request, ['klient', 'admin']):
-        messages.error(request, 'Nie masz uprawnień do dodawania zgłoszenia.')
+    if not wymagaj_roli(request, ['klient', 'admin'], 'Tylko klient lub admin może dodać zgłoszenie.'):
         return redirect('home')
+
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
 
     if request.method == 'POST':
         form = ZgloszenieForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            zgloszenie = form.save(commit=False)
+
+            if uzytkownik.rola == 'klient':
+                zgloszenie.klient = uzytkownik
+
+            zgloszenie.save()
+            messages.success(request, 'Zgłoszenie zostało dodane.')
             return redirect('zgloszenia')
     else:
         form = ZgloszenieForm()
+
+        if uzytkownik.rola == 'klient':
+            form.fields['klient'].initial = uzytkownik
+            form.fields['klient'].disabled = True
+            form.fields['rower'].queryset = Rower.objects.filter(klient=uzytkownik)
 
     return render(request, 'dodaj_zgloszenie.html', {'form': form})
     
