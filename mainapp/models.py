@@ -319,3 +319,15 @@ class HistoriaStatusu(models.Model):
     def __str__(self):
         return f"{self.zlecenie} - {self.status}"
         
+class StanowiskoSerwisowe(models.Model):
+    nazwa = models.CharField(max_length=50)
+    opis = models.TextField(blank=True)
+    czy_aktywne = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Stanowisko serwisowe"
+        verbose_name_plural = "Stanowiska serwisowe"
+
+    def __str__(self):
+        return self.nazwa
+        
