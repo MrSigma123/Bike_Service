@@ -364,3 +364,16 @@ class UslugaSerwisowa(models.Model):
     def __str__(self):
         return self.nazwa
         
+class WykonanaUsluga(models.Model):
+    zlecenie = models.ForeignKey(ZlecenieSerwisowe, on_delete=models.CASCADE, related_name='wykonane_uslugi')
+    usluga = models.ForeignKey(UslugaSerwisowa, on_delete=models.CASCADE, related_name='wykonania')
+    ilosc = models.PositiveIntegerField(default=1)
+    cena_wykonania = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        verbose_name = "Wykonana usługa"
+        verbose_name_plural = "Wykonane usługi"
+
+    def __str__(self):
+        return f"{self.usluga} - {self.zlecenie}"
+        
