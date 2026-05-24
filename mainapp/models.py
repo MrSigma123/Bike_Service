@@ -331,3 +331,22 @@ class StanowiskoSerwisowe(models.Model):
     def __str__(self):
         return self.nazwa
         
+class TerminSerwisu(models.Model):
+    zlecenie = models.ForeignKey(ZlecenieSerwisowe, on_delete=models.CASCADE, related_name='terminy')
+    stanowisko = models.ForeignKey(
+        StanowiskoSerwisowe,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='terminy'
+    )
+    data_terminu = models.DateTimeField()
+    opis = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = "Termin serwisu"
+        verbose_name_plural = "Terminy serwisu"
+
+    def __str__(self):
+        return f"Termin #{self.id} - {self.data_terminu}"
+        
