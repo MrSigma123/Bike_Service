@@ -26,17 +26,31 @@ class Uzytkownik(models.Model):
 
 class Rower(models.Model):
     klient = models.ForeignKey(Uzytkownik, on_delete=models.CASCADE, related_name='rowery')
+    producent = models.ForeignKey(
+        'ProducentRoweru',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='rowery'
+    )
+    typ_roweru = models.ForeignKey(
+        'TypRoweru',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='rowery'
+    )
     marka = models.CharField(max_length=50)
     model = models.CharField(max_length=50)
     typ = models.CharField(max_length=50)
-    numer_seryjny = models.CharField(max_length=100, unique=True)
+    numer_seryjny = models.CharField(max_length=100)
 
     class Meta:
-        verbose_name = 'Rower'
-        verbose_name_plural = 'Rowery'
+        verbose_name = "Rower"
+        verbose_name_plural = "Rowery"
 
     def __str__(self):
-        return f'{self.marka} {self.model}'
+        return f"{self.marka} {self.model}"
 
 
 class Zgloszenie(models.Model):
