@@ -29,6 +29,8 @@ urlpatterns = [
 
     path('zlecenia/', views.zlecenia, name='zlecenia'),
     path('zlecenia/przyjmij/<int:zlecenie_id>/', views.przyjmij_zlecenie, name='przyjmij_zlecenie'),
+    path('zlecenia/<int:zlecenie_id>/', views.szczegoly_zlecenia, name='szczegoly_zlecenia'),
+    path('zlecenia/<int:zlecenie_id>/status/', views.zmien_status, name='zmien_status'),
 
     path('diagnozy/dodaj/', views.dodaj_diagnoze, name='dodaj_diagnoze'),
     path('raporty/dodaj/', views.dodaj_raport, name='dodaj_raport'),
@@ -38,4 +40,11 @@ urlpatterns = [
 
     path('zamowienia-czesci/', views.zamowienia_czesci, name='zamowienia_czesci'),
     path('zamowienia-czesci/dodaj/', views.dodaj_zamowienie_czesci, name='dodaj_zamowienie_czesci'),
+    
+    path('powiadomienia/', views.powiadomienia, name='powiadomienia'),
+    
+    path('platnosci/', views.platnosci, name='platnosci'),
+    path('platnosci/dodaj/', views.dodaj_platnosc, name='dodaj_platnosc'),
+    
+    path('pozycje-zamowienia/dodaj/', views.dodaj_pozycje_zamowienia, name='dodaj_pozycje_zamowienia'),
 ]

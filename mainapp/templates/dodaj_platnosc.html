@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Dodaj płatność{% endblock %}
+
+{% block content %}
+<h2>Dodaj płatność</h2>
+
+<form method="post" class="form-box">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div class="actions">
+        <button type="submit" class="btn">Zapisz płatność</button>
+        <a href="{% url 'platnosci' %}" class="btn">Powrót</a>
+    </div>
+</form>
+{% endblock %}

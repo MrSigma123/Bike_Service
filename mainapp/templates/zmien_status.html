@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Zmień status zlecenia{% endblock %}
+
+{% block content %}
+<h2>Zmień status zlecenia #{{ zlecenie.id }}</h2>
+
+<p>
+    Aktualny status:
+    <span class="badge">{{ zlecenie.status }}</span>
+</p>
+
+<form method="post" class="form-box">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div class="actions">
+        <button type="submit" class="btn">Zapisz status</button>
+        <a href="{% url 'szczegoly_zlecenia' zlecenie.id %}" class="btn">Powrót</a>
+    </div>
+</form>
+{% endblock %}

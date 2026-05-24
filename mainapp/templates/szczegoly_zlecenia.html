@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Szczegóły zlecenia{% endblock %}
+
+{% block content %}
+<h2>Szczegóły zlecenia #{{ zlecenie.id }}</h2>
+
+<div class="card">
+    <h3>Informacje podstawowe</h3>
+    <p><strong>Status:</strong> <span class="badge">{{ zlecenie.status }}</span></p>
+    <p><strong>Klient:</strong> {{ zlecenie.zgloszenie.klient }}</p>
+    <p><strong>Rower:</strong> {{ zlecenie.zgloszenie.rower }}</p>
+    <p><strong>Mechanik:</strong> {{ zlecenie.mechanik }}</p>
+    <p><strong>Opis usterki:</strong> {{ zlecenie.zgloszenie.opis_usterki }}</p>
+</div>
+
+<h2 class="section-title">Diagnozy</h2>
+<table>
+    <tr>
+        <th>Data</th>
+        <th>Opis diagnozy</th>
+    </tr>
+    {% for d in diagnozy %}
+    <tr>
+        <td>{{ d.data_diagnozy }}</td>
+        <td>{{ d.opis_diagnozy }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="2">Brak diagnoz.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h2 class="section-title">Raporty naprawy</h2>
+<table>
+    <tr>
+        <th>Data</th>
+        <th>Opis czynności</th>
+    </tr>
+    {% for r in raporty %}
+    <tr>
+        <td>{{ r.data_raportu }}</td>
+        <td>{{ r.opis_czynnosci }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="2">Brak raportów.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h2 class="section-title">Zużyte części</h2>
+<table>
+    <tr>
+        <th>Część</th>
+        <th>Ilość</th>
+    </tr>
+    {% for zc in zuzyte_czesci %}
+    <tr>
+        <td>{{ zc.czesc }}</td>
+        <td>{{ zc.ilosc }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="2">Brak zużytych części.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h2 class="section-title">Płatności</h2>
+<table>
+    <tr>
+        <th>Kwota</th>
+        <th>Status</th>
+        <th>Metoda</th>
+        <th>Data płatności</th>
+    </tr>
+    {% for p in platnosci %}
+    <tr>
+        <td>{{ p.kwota }}</td>
+        <td><span class="badge">{{ p.status }}</span></td>
+        <td>{{ p.metoda_platnosci }}</td>
+        <td>{{ p.data_platnosci }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="4">Brak płatności.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h2 class="section-title">Historia statusów</h2>
+<table>
+    <tr>
+        <th>Status</th>
+        <th>Data zmiany</th>
+        <th>Komentarz</th>
+    </tr>
+    {% for h in historia_statusow %}
+    <tr>
+        <td><span class="badge">{{ h.status }}</span></td>
+        <td>{{ h.data_zmiany }}</td>
+        <td>{{ h.komentarz }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="3">Brak historii statusów.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div class="actions">
+    {% if uzytkownik_aplikacji.rola == 'mechanik' or uzytkownik_aplikacji.rola == 'admin' %}
+        <a href="{% url 'zmien_status' zlecenie.id %}" class="btn">Zmień status</a>
+    {% endif %}
+
+    <a href="{% url 'zlecenia' %}" class="btn">Powrót do zleceń</a>
+</div>
+{% endblock %}

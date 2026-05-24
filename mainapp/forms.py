@@ -10,6 +10,9 @@ from .models import (
     RaportNaprawy,
     ZuzytaCzesc,
     ZamowienieCzesci,
+    Platnosc,
+    PozycjaZamowienia,
+    ZlecenieSerwisowe,
 )
 
 class RowerForm(forms.ModelForm):
@@ -166,4 +169,41 @@ class ZamowienieCzesciForm(forms.ModelForm):
             'dostawca': 'Dostawca',
             'status': 'Status',
             'uwagi': 'Uwagi',
+        }
+        
+class PlatnoscForm(forms.ModelForm):
+    class Meta:
+        model = Platnosc
+        fields = ['zlecenie', 'kwota', 'data_platnosci', 'status', 'metoda_platnosci']
+        labels = {
+            'zlecenie': 'Zlecenie',
+            'kwota': 'Kwota',
+            'data_platnosci': 'Data płatności',
+            'status': 'Status',
+            'metoda_platnosci': 'Metoda płatności',
+        }
+        
+class PozycjaZamowieniaForm(forms.ModelForm):
+    class Meta:
+        model = PozycjaZamowienia
+        fields = ['zamowienie', 'czesc', 'ilosc', 'cena_jednostkowa']
+        labels = {
+            'zamowienie': 'Zamówienie',
+            'czesc': 'Część',
+            'ilosc': 'Ilość',
+            'cena_jednostkowa': 'Cena jednostkowa',
+        }
+        
+class StatusZleceniaForm(forms.ModelForm):
+    komentarz = forms.CharField(
+        label='Komentarz do zmiany statusu',
+        widget=forms.Textarea,
+        required=False
+    )
+
+    class Meta:
+        model = ZlecenieSerwisowe
+        fields = ['status']
+        labels = {
+            'status': 'Nowy status',
         }

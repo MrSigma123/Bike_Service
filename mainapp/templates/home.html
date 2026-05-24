@@ -25,7 +25,7 @@
                     <a href="{% url 'czesci' %}" class="btn btn-secondary">Magazyn części</a>
                 {% elif uzytkownik_aplikacji.rola == 'admin' %}
                     <a href="{% url 'panel_admin' %}" class="btn btn-primary">Panel administratora</a>
-                    <a href="{% url 'panel-admin' %}" class="btn btn-secondary">Zarządzanie</a>
+                    <a href="{% url 'panel_admin' %}" class="btn btn-secondary">Zarządzanie</a>
                 {% endif %}
             </div>
         {% else %}

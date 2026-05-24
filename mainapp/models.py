@@ -76,17 +76,20 @@ class Zgloszenie(models.Model):
 
 class ZlecenieSerwisowe(models.Model):
     STATUS_CHOICES = [
-        ('przyjete', 'Przyjęte'),
+        ('nowe', 'Nowe'),
+        ('w_realizacji', 'W realizacji'),
         ('diagnoza', 'Diagnoza'),
         ('naprawa', 'Naprawa'),
-        ('gotowe', 'Gotowe'),
+        ('gotowe', 'Gotowe do odbioru'),
+        ('zakonczone', 'Zakończone'),
+        ('anulowane', 'Anulowane'),
     ]
 
     zgloszenie = models.ForeignKey(Zgloszenie, on_delete=models.CASCADE, related_name='zlecenia')
     mechanik = models.ForeignKey(Uzytkownik, on_delete=models.SET_NULL, null=True, blank=True, related_name='zlecenia_mechanika')
     data_przyjecia = models.DateTimeField(auto_now_add=True)
     data_zakonczenia = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='przyjete')
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='nowe')
 
     class Meta:
         verbose_name = 'Zlecenie serwisowe'

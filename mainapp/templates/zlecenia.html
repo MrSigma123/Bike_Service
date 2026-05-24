@@ -5,11 +5,13 @@
 {% block content %}
 <h2>Zlecenia serwisowe</h2>
 
+{% if uzytkownik_aplikacji.rola == 'mechanik' or uzytkownik_aplikacji.rola == 'admin' %}
 <div class="actions">
     <a href="{% url 'dodaj_diagnoze' %}" class="btn">Dodaj diagnozę</a>
     <a href="{% url 'dodaj_raport' %}" class="btn">Dodaj raport</a>
     <a href="{% url 'dodaj_zuzyta_czesc' %}" class="btn">Zużyta część</a>
 </div>
+{% endif %}
 
 <table>
     <tr>
@@ -29,7 +31,11 @@
         <td><span class="badge">{{ z.status }}</span></td>
         <td>{{ z.data_przyjecia }}</td>
         <td>
-            <a href="{% url 'przyjmij_zlecenie' z.id %}" class="btn">Przyjmij</a>
+            <a href="{% url 'szczegoly_zlecenia' z.id %}" class="btn">Szczegóły</a>
+
+            {% if uzytkownik_aplikacji.rola == 'mechanik' or uzytkownik_aplikacji.rola == 'admin' %}
+                <a href="{% url 'przyjmij_zlecenie' z.id %}" class="btn">Przyjmij</a>
+            {% endif %}
         </td>
     </tr>
     {% empty %}

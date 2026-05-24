@@ -16,6 +16,9 @@ from .forms import (
     RaportNaprawyForm,
     ZuzytaCzescForm,
     ZamowienieCzesciForm,
+    PlatnoscForm,
+    PozycjaZamowieniaForm,
+    StatusZleceniaForm,
 )
 from .models import (
     Czesc,
@@ -27,6 +30,11 @@ from .models import (
     ZlecenieSerwisowe,
     ZuzytaCzesc,
     ZamowienieCzesci,
+    ZlecenieSerwisowe,
+    Powiadomienie,
+    HistoriaStatusu,
+    Platnosc,
+    PozycjaZamowienia,
 )
 
 def pobierz_uzytkownika_aplikacji(request):
@@ -54,6 +62,22 @@ def wymagaj_roli(request, dozwolone_role, komunikat='Brak uprawnień.'):
         return False
 
     return True
+    
+def zmien_status_zlecenia(zlecenie, nowy_status, komentarz):
+    zlecenie.status = nowy_status
+    zlecenie.save()
+
+    HistoriaStatusu.objects.create(
+        zlecenie=zlecenie,
+        status=nowy_status,
+        komentarz=komentarz
+    )
+
+    Powiadomienie.objects.create(
+        uzytkownik=zlecenie.zgloszenie.klient,
+        zlecenie=zlecenie,
+        tresc=komentarz
+    )
 
 def home(request):
     context = {
@@ -265,7 +289,35 @@ def dodaj_zgloszenie(request):
                 zgloszenie.status = 'nowe'
 
             zgloszenie.save()
-            messages.success(request, 'Zgłoszenie zostało dodane.')
+
+            mechanik = Uzytkownik.objects.filter(rola='mechanik').first()
+
+            if mechanik:
+                zlecenie = ZlecenieSerwisowe.objects.create(
+                    zgloszenie=zgloszenie,
+                    mechanik=mechanik,
+                    status='nowe'
+                )
+
+                HistoriaStatusu.objects.create(
+                    zlecenie=zlecenie,
+                    status='nowe',
+                    komentarz='Zlecenie zostało automatycznie utworzone po dodaniu zgłoszenia.'
+                )
+
+                Powiadomienie.objects.create(
+                    uzytkownik=zgloszenie.klient,
+                    zlecenie=zlecenie,
+                    tresc='Twoje zgłoszenie zostało przyjęte. Utworzono zlecenie serwisowe.'
+                )
+
+                messages.success(request, 'Zgłoszenie zostało dodane i utworzono zlecenie serwisowe.')
+            else:
+                messages.warning(
+                    request,
+                    'Zgłoszenie zostało dodane, ale nie utworzono zlecenia, ponieważ nie ma mechanika w systemie.'
+                )
+
             return redirect('zgloszenia')
     else:
         form = ZgloszenieForm()
@@ -280,7 +332,7 @@ def dodaj_zgloszenie(request):
             form.fields['rower'].queryset = Rower.objects.filter(klient=uzytkownik)
 
     return render(request, 'dodaj_zgloszenie.html', {'form': form})
-    
+        
 @login_required
 def panel_klienta(request):
     if not wymagaj_roli(request, ['klient', 'admin'], 'Dostęp tylko dla klienta.'):
@@ -342,22 +394,28 @@ def panel_magazyniera(request):
     
 @login_required
 def zlecenia(request):
-    if not wymagaj_roli(request, ['mechanik', 'admin'], 'Brak dostępu do zleceń.'):
-        return redirect('home')
-
     uzytkownik = pobierz_uzytkownika_aplikacji(request)
 
-    if uzytkownik.rola == 'mechanik':
+    if uzytkownik is None:
+        messages.error(request, 'Brak profilu użytkownika aplikacji.')
+        return redirect('home')
+
+    if uzytkownik.rola == 'klient':
+        zlecenia = ZlecenieSerwisowe.objects.filter(zgloszenie__klient=uzytkownik)
+    elif uzytkownik.rola == 'mechanik':
         zlecenia = ZlecenieSerwisowe.objects.filter(mechanik=uzytkownik)
-    else:
+    elif uzytkownik.rola == 'admin':
         zlecenia = ZlecenieSerwisowe.objects.all()
+    else:
+        messages.error(request, 'Brak dostępu do zleceń.')
+        return redirect('home')
 
     return render(request, 'zlecenia.html', {'zlecenia': zlecenia})
 
 
 @login_required
 def przyjmij_zlecenie(request, zlecenie_id):
-    if not wymagaj_roli(request, ['mechanik', 'admin'], 'Tylko mechanik może przyjąć zlecenie.'):
+    if not wymagaj_roli(request, ['mechanik', 'admin'], 'Tylko mechanik lub admin może przyjąć zlecenie.'):
         return redirect('home')
 
     zlecenie = get_object_or_404(ZlecenieSerwisowe, id=zlecenie_id)
@@ -365,9 +423,13 @@ def przyjmij_zlecenie(request, zlecenie_id):
 
     if uzytkownik.rola == 'mechanik':
         zlecenie.mechanik = uzytkownik
+        zlecenie.save()
 
-    zlecenie.status = 'w_realizacji'
-    zlecenie.save()
+    zmien_status_zlecenia(
+        zlecenie,
+        'w_realizacji',
+        'Zlecenie zostało przyjęte do realizacji przez mechanika.'
+    )
 
     messages.success(request, 'Zlecenie zostało przyjęte do realizacji.')
     return redirect('zlecenia')
@@ -382,8 +444,15 @@ def dodaj_diagnoze(request):
         form = DiagnozaForm(request.POST)
 
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Diagnoza została dodana.')
+            diagnoza = form.save()
+
+            zmien_status_zlecenia(
+                diagnoza.zlecenie,
+                'diagnoza',
+                'Mechanik dodał diagnozę usterki.'
+            )
+
+            messages.success(request, 'Diagnoza została dodana, a status zlecenia zaktualizowany.')
             return redirect('zlecenia')
     else:
         form = DiagnozaForm()
@@ -400,8 +469,15 @@ def dodaj_raport(request):
         form = RaportNaprawyForm(request.POST)
 
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Raport naprawy został dodany.')
+            raport = form.save()
+
+            zmien_status_zlecenia(
+                raport.zlecenie,
+                'gotowe',
+                'Dodano raport naprawy. Rower jest gotowy do odbioru.'
+            )
+
+            messages.success(request, 'Raport naprawy został dodany, a status zlecenia ustawiono jako gotowe.')
             return redirect('zlecenia')
     else:
         form = RaportNaprawyForm()
@@ -437,13 +513,19 @@ def dodaj_zuzyta_czesc(request):
             czesc.stan_magazynowy -= zuzyta_czesc.ilosc
             czesc.save()
 
+            zmien_status_zlecenia(
+                zuzyta_czesc.zlecenie,
+                'naprawa',
+                f'Użyto części: {zuzyta_czesc.czesc}, ilość: {zuzyta_czesc.ilosc}.'
+            )
+
             messages.success(request, 'Zużyta część została zapisana, a stan magazynowy zaktualizowany.')
             return redirect('zlecenia')
     else:
         form = ZuzytaCzescForm()
 
     return render(request, 'dodaj_zuzyta_czesc.html', {'form': form})
-    
+        
 @login_required
 def dodaj_czesc(request):
     if not wymagaj_roli(request, ['magazynier', 'admin'], 'Tylko magazynier lub admin może dodać część.'):
@@ -487,3 +569,136 @@ def dodaj_zamowienie_czesci(request):
         form = ZamowienieCzesciForm()
 
     return render(request, 'dodaj_zamowienie_czesci.html', {'form': form})
+    
+@login_required
+def szczegoly_zlecenia(request, zlecenie_id):
+    zlecenie = get_object_or_404(ZlecenieSerwisowe, id=zlecenie_id)
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
+
+    if uzytkownik is None:
+        messages.error(request, 'Brak profilu użytkownika aplikacji.')
+        return redirect('home')
+
+    if uzytkownik.rola == 'klient' and zlecenie.zgloszenie.klient != uzytkownik:
+        messages.error(request, 'Nie masz dostępu do tego zlecenia.')
+        return redirect('home')
+
+    if uzytkownik.rola == 'mechanik' and zlecenie.mechanik != uzytkownik:
+        messages.error(request, 'Nie masz dostępu do tego zlecenia.')
+        return redirect('home')
+
+    if uzytkownik.rola == 'magazynier':
+        messages.error(request, 'Magazynier nie ma dostępu do szczegółów zlecenia.')
+        return redirect('home')
+
+    context = {
+        'zlecenie': zlecenie,
+        'diagnozy': zlecenie.diagnozy.all(),
+        'raporty': zlecenie.raporty.all(),
+        'zuzyte_czesci': zlecenie.zuzyte_czesci.all(),
+        'platnosci': zlecenie.platnosci.all(),
+        'powiadomienia': zlecenie.powiadomienia.all(),
+        'historia_statusow': zlecenie.historia_statusow.all().order_by('-data_zmiany'),
+    }
+
+    return render(request, 'szczegoly_zlecenia.html', context)
+    
+@login_required
+def powiadomienia(request):
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
+
+    if uzytkownik is None:
+        messages.error(request, 'Brak profilu użytkownika aplikacji.')
+        return redirect('home')
+
+    if uzytkownik.rola == 'admin':
+        powiadomienia = Powiadomienie.objects.all().order_by('-data_wyslania')
+    else:
+        powiadomienia = Powiadomienie.objects.filter(uzytkownik=uzytkownik).order_by('-data_wyslania')
+
+    return render(request, 'powiadomienia.html', {'powiadomienia': powiadomienia})
+    
+@login_required
+def platnosci(request):
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
+
+    if uzytkownik is None:
+        messages.error(request, 'Brak profilu użytkownika aplikacji.')
+        return redirect('home')
+
+    if uzytkownik.rola == 'klient':
+        platnosci = Platnosc.objects.filter(zlecenie__zgloszenie__klient=uzytkownik)
+    elif uzytkownik.rola == 'admin':
+        platnosci = Platnosc.objects.all()
+    else:
+        messages.error(request, 'Brak dostępu do płatności.')
+        return redirect('home')
+
+    return render(request, 'platnosci.html', {'platnosci': platnosci})
+
+
+@login_required
+def dodaj_platnosc(request):
+    if not wymagaj_roli(request, ['admin'], 'Tylko admin może dodawać płatności.'):
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = PlatnoscForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Płatność została dodana.')
+            return redirect('platnosci')
+    else:
+        form = PlatnoscForm()
+
+    return render(request, 'dodaj_platnosc.html', {'form': form})
+    
+@login_required
+def dodaj_pozycje_zamowienia(request):
+    if not wymagaj_roli(request, ['magazynier', 'admin'], 'Tylko magazynier lub admin może dodawać pozycje zamówienia.'):
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = PozycjaZamowieniaForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Pozycja zamówienia została dodana.')
+            return redirect('zamowienia_czesci')
+    else:
+        form = PozycjaZamowieniaForm()
+
+    return render(request, 'dodaj_pozycje_zamowienia.html', {'form': form})
+    
+@login_required
+def zmien_status(request, zlecenie_id):
+    if not wymagaj_roli(request, ['mechanik', 'admin'], 'Tylko mechanik lub admin może zmieniać status zlecenia.'):
+        return redirect('home')
+
+    zlecenie = get_object_or_404(ZlecenieSerwisowe, id=zlecenie_id)
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
+
+    if uzytkownik.rola == 'mechanik' and zlecenie.mechanik != uzytkownik:
+        messages.error(request, 'Nie możesz zmienić statusu zlecenia przypisanego do innego mechanika.')
+        return redirect('zlecenia')
+
+    if request.method == 'POST':
+        form = StatusZleceniaForm(request.POST, instance=zlecenie)
+
+        if form.is_valid():
+            nowy_status = form.cleaned_data['status']
+            komentarz = form.cleaned_data.get('komentarz') or f'Status zlecenia zmieniono na: {nowy_status}.'
+
+            zmien_status_zlecenia(
+                zlecenie,
+                nowy_status,
+                komentarz
+            )
+
+            messages.success(request, 'Status zlecenia został zmieniony.')
+            return redirect('szczegoly_zlecenia', zlecenie_id=zlecenie.id)
+    else:
+        form = StatusZleceniaForm(instance=zlecenie)
+
+    return render(request, 'zmien_status.html', {'form': form, 'zlecenie': zlecenie})

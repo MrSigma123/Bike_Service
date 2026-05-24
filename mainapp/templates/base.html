@@ -473,11 +473,13 @@
                         <a href="{% url 'panel_klienta' %}">Panel klienta</a>
                         <a href="{% url 'rowery' %}">Moje rowery</a>
                         <a href="{% url 'zgloszenia' %}">Moje zgłoszenia</a>
+                        <a href="{% url 'powiadomienia' %}">Powiadomienia</a>
                     {% elif uzytkownik_aplikacji.rola == 'mechanik' %}
                         <a href="{% url 'panel_mechanika' %}">Panel mechanika</a>
                         <a href="{% url 'zlecenia' %}">Zlecenia</a>
                         <a href="{% url 'zgloszenia' %}">Zgłoszenia</a>
                         <a href="{% url 'czesci' %}">Części</a>
+                        <a href="{% url 'powiadomienia' %}">Powiadomienia</a>
                     {% elif uzytkownik_aplikacji.rola == 'magazynier' %}
                         <a href="{% url 'panel_magazyniera' %}">Panel magazyniera</a>
                         <a href="{% url 'czesci' %}">Części</a>
@@ -487,8 +489,37 @@
                         <a href="{% url 'rowery' %}">Rowery</a>
                         <a href="{% url 'zgloszenia' %}">Zgłoszenia</a>
                         <a href="{% url 'czesci' %}">Części</a>
+                        <a href="{% url 'powiadomienia' %}">Powiadomienia</a>
                     {% endif %}
 
+                {% endif %}
+                
+                {% if user.is_authenticated and uzytkownik_aplikacji %}
+                    <div class="user-box">
+                        <span class="user-label">
+                            Zalogowano jako: <strong>{{ user.username }}</strong>
+                            — {{ uzytkownik_aplikacji.get_rola_display }}
+                        </span>
+
+                        <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-button">Wyloguj</button>
+                        </form>
+                    </div>
+                {% elif user.is_authenticated and not uzytkownik_aplikacji %}
+                    <div class="user-box">
+                        <span class="user-label">Zalogowano jako: <strong>{{ user.username }}</strong></span>
+
+                        <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-button">Wyloguj</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <div class="user-box">
+                        <a href="{% url 'login' %}">Logowanie</a>
+                        <a href="{% url 'rejestracja' %}">Rejestracja</a>
+                    </div>
                 {% endif %}
             </nav>
         </div>
