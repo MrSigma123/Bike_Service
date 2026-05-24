@@ -123,18 +123,25 @@ class RaportNaprawy(models.Model):
 
 
 class Czesc(models.Model):
+    kategoria = models.ForeignKey(
+        'KategoriaCzesci',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='czesci'
+    )
     nazwa = models.CharField(max_length=100)
-    stan_magazynowy = models.IntegerField(default=0)
-    stan_minimalny = models.IntegerField(default=0)
+    stan_magazynowy = models.IntegerField()
+    stan_minimalny = models.IntegerField()
     cena = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
-        verbose_name = 'Część'
-        verbose_name_plural = 'Części'
+        verbose_name = "Część"
+        verbose_name_plural = "Części"
 
     def __str__(self):
         return self.nazwa
-
+        
 
 class ZuzytaCzesc(models.Model):
     zlecenie = models.ForeignKey(ZlecenieSerwisowe, on_delete=models.CASCADE, related_name='zuzyte_czesci')
