@@ -6,113 +6,187 @@
 
 <section class="hero">
     <div class="hero-main">
-        <h2>Profesjonalna obsługa serwisu rowerowego</h2>
-        <p>
-            System wspiera obsługę klientów, rowerów, zgłoszeń serwisowych,
-            pracy mechaników oraz magazynu części. Aplikacja została przygotowana
-            w Django z wykorzystaniem ORM oraz bazy PostgreSQL.
-        </p>
+        {% if user.is_authenticated and uzytkownik_aplikacji %}
+            <h2>Witaj, {{ uzytkownik_aplikacji.imie }}!</h2>
+            <p>
+                Jesteś zalogowany jako <strong>{{ uzytkownik_aplikacji.get_rola_display }}</strong>.
+                Wybierz swój panel roboczy albo przejdź bezpośrednio do najważniejszych funkcji systemu.
+            </p>
 
-        <div class="hero-actions">
-            {% if user.is_authenticated %}
-                <a href="{% url 'rowery' %}" class="btn btn-primary">Przejdź do rowerów</a>
-                <a href="{% url 'zgloszenia' %}" class="btn btn-secondary">Zobacz zgłoszenia</a>
-            {% else %}
+            <div class="hero-actions">
+                {% if uzytkownik_aplikacji.rola == 'klient' %}
+                    <a href="{% url 'panel_klienta' %}" class="btn btn-primary">Panel klienta</a>
+                    <a href="{% url 'dodaj_zgloszenie' %}" class="btn btn-secondary">Dodaj zgłoszenie</a>
+                {% elif uzytkownik_aplikacji.rola == 'mechanik' %}
+                    <a href="{% url 'panel_mechanika' %}" class="btn btn-primary">Panel mechanika</a>
+                    <a href="{% url 'zlecenia' %}" class="btn btn-secondary">Zlecenia</a>
+                {% elif uzytkownik_aplikacji.rola == 'magazynier' %}
+                    <a href="{% url 'panel_magazyniera' %}" class="btn btn-primary">Panel magazyniera</a>
+                    <a href="{% url 'czesci' %}" class="btn btn-secondary">Magazyn części</a>
+                {% elif uzytkownik_aplikacji.rola == 'admin' %}
+                    <a href="{% url 'panel_admin' %}" class="btn btn-primary">Panel administratora</a>
+                    <a href="{% url 'panel-admin' %}" class="btn btn-secondary">Zarządzanie</a>
+                {% endif %}
+            </div>
+        {% else %}
+            <h2>System obsługi serwisu rowerowego</h2>
+            <p>
+                Aplikacja wspiera obsługę klientów, rowerów, zgłoszeń serwisowych,
+                pracy mechaników oraz magazynu części. System został wykonany w Django
+                z użyciem ORM oraz bazy PostgreSQL.
+            </p>
+
+            <div class="hero-actions">
                 <a href="{% url 'login' %}" class="btn btn-primary">Zaloguj się</a>
                 <a href="{% url 'rejestracja' %}" class="btn btn-secondary">Utwórz konto klienta</a>
-            {% endif %}
-        </div>
+            </div>
+        {% endif %}
     </div>
 
     <div class="login-panel">
-        {% if user.is_authenticated %}
-            <h3>Panel użytkownika</h3>
-            <p>Jesteś zalogowany jako:</p>
-            <p><span class="badge">{{ user.username }}</span></p>
+        {% if user.is_authenticated and uzytkownik_aplikacji %}
+            <h3>Twoja rola</h3>
+            <p><span class="badge">{{ uzytkownik_aplikacji.get_rola_display }}</span></p>
 
-            <div class="actions">
-                <a href="{% url 'rowery' %}" class="btn">Rowery</a>
-                <a href="{% url 'zgloszenia' %}" class="btn">Zgłoszenia</a>
-            </div>
-        {% else %}
-            <h3>Dostęp do aplikacji</h3>
             <p>
-                Aby przeglądać dane systemu oraz korzystać z formularzy,
-                zaloguj się na konto użytkownika.
+                Konto użytkownika: <strong>{{ user.username }}</strong>
             </p>
 
-            <a href="{% url 'login' %}" class="btn">Logowanie</a>
-            <a href="{% url 'rejestracja' %}" class="btn btn-secondary">Rejestracja</a>
+            <p>
+                Dostępne funkcje są dopasowane do roli użytkownika.
+            </p>
+        {% elif user.is_authenticated and not uzytkownik_aplikacji %}
+            <h3>Brak profilu aplikacji</h3>
+            <p>
+                Jesteś zalogowany w Django, ale nie masz przypisanego profilu
+                w systemie MAINAPP. Skontaktuj się z administratorem aplikacji.
+            </p>
+        {% else %}
+            <h3>Dostęp do systemu</h3>
+            <p>
+                Klient może samodzielnie utworzyć konto. Konta mechaników,
+                magazynierów i administratorów są tworzone przez administratora aplikacji.
+            </p>
         {% endif %}
     </div>
 </section>
 
-<h2 class="section-title">Dashboard systemu</h2>
-<p>
-    Poniższe dane są pobierane bezpośrednio z bazy danych za pomocą Django ORM.
-</p>
+<section>
+    <h2 class="section-title">Podsumowanie danych</h2>
+    <p>
+        Liczniki prezentują aktualny stan danych zapisanych w bazie PostgreSQL.
+    </p>
 
-<div class="stats">
-    <div class="card">
-        <h3>Użytkownicy</h3>
-        <p class="stat-number">{{ liczba_uzytkownikow }}</p>
-    </div>
-
-    <div class="card">
-        <h3>Rowery</h3>
-        <p class="stat-number">{{ liczba_rowerow }}</p>
-    </div>
-
-    <div class="card">
-        <h3>Zgłoszenia</h3>
-        <p class="stat-number">{{ liczba_zgloszen }}</p>
-    </div>
-
-    <div class="card">
-        <h3>Części</h3>
-        <p class="stat-number">{{ liczba_czesci }}</p>
-    </div>
-</div>
-
-{% if user.is_authenticated %}
-    <h2 class="section-title">Szybkie akcje</h2>
-    <p>Najważniejsze funkcje dostępne dla zalogowanego użytkownika.</p>
-
-    <div class="quick-grid">
-        <a href="{% url 'rowery' %}" class="quick-card">
-            <strong>Lista rowerów</strong>
-            <span>Przegląd rowerów zarejestrowanych w systemie.</span>
-        </a>
-
-        <a href="{% url 'zgloszenia' %}" class="quick-card">
-            <strong>Zgłoszenia serwisowe</strong>
-            <span>Podgląd zgłoszeń oraz ich aktualnych statusów.</span>
-        </a>
-
-        <a href="{% url 'czesci' %}" class="quick-card">
-            <strong>Magazyn części</strong>
-            <span>Lista części dostępnych w magazynie serwisu.</span>
-        </a>
-    </div>
-{% else %}
-    <h2 class="section-title">Zakres systemu</h2>
-
-    <div class="quick-grid">
-        <div class="quick-card">
-            <strong>Obsługa klientów</strong>
-            <span>Rejestrowanie rowerów i zgłoszeń serwisowych.</span>
+    <div class="stats">
+        <div class="card">
+            <h3>Użytkownicy</h3>
+            <p class="stat-number">{{ liczba_uzytkownikow }}</p>
         </div>
 
-        <div class="quick-card">
-            <strong>Praca serwisu</strong>
-            <span>Diagnozy, raporty napraw oraz historia statusów.</span>
+        <div class="card">
+            <h3>Rowery</h3>
+            <p class="stat-number">{{ liczba_rowerow }}</p>
         </div>
 
-        <div class="quick-card">
-            <strong>Magazyn części</strong>
-            <span>Kontrola stanów magazynowych i zużytych części.</span>
+        <div class="card">
+            <h3>Zgłoszenia</h3>
+            <p class="stat-number">{{ liczba_zgloszen }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Części</h3>
+            <p class="stat-number">{{ liczba_czesci }}</p>
         </div>
     </div>
-{% endif %}
+</section>
+
+<section>
+    {% if user.is_authenticated and uzytkownik_aplikacji %}
+        <h2 class="section-title">Najważniejsze skróty</h2>
+
+        <div class="quick-grid">
+            {% if uzytkownik_aplikacji.rola == 'klient' %}
+                <a href="{% url 'rowery' %}" class="quick-card">
+                    <strong>Moje rowery</strong>
+                    <span>Przegląd rowerów przypisanych do Twojego konta.</span>
+                </a>
+
+                <a href="{% url 'dodaj_rower' %}" class="quick-card">
+                    <strong>Dodaj rower</strong>
+                    <span>Zarejestruj rower przed zgłoszeniem usterki.</span>
+                </a>
+
+                <a href="{% url 'zgloszenia' %}" class="quick-card">
+                    <strong>Moje zgłoszenia</strong>
+                    <span>Sprawdź zgłoszenia i ich aktualny status.</span>
+                </a>
+            {% elif uzytkownik_aplikacji.rola == 'mechanik' %}
+                <a href="{% url 'zlecenia' %}" class="quick-card">
+                    <strong>Zlecenia serwisowe</strong>
+                    <span>Lista zleceń przypisanych do obsługi.</span>
+                </a>
+
+                <a href="{% url 'dodaj_diagnoze' %}" class="quick-card">
+                    <strong>Dodaj diagnozę</strong>
+                    <span>Opisz rozpoznaną usterkę roweru.</span>
+                </a>
+
+                <a href="{% url 'dodaj_raport' %}" class="quick-card">
+                    <strong>Dodaj raport</strong>
+                    <span>Zapisz wykonane czynności serwisowe.</span>
+                </a>
+            {% elif uzytkownik_aplikacji.rola == 'magazynier' %}
+                <a href="{% url 'czesci' %}" class="quick-card">
+                    <strong>Magazyn części</strong>
+                    <span>Przegląd części i stanów magazynowych.</span>
+                </a>
+
+                <a href="{% url 'dodaj_czesc' %}" class="quick-card">
+                    <strong>Dodaj część</strong>
+                    <span>Dodaj nową część do magazynu.</span>
+                </a>
+
+                <a href="{% url 'zamowienia_czesci' %}" class="quick-card">
+                    <strong>Zamówienia części</strong>
+                    <span>Obsługa zamówień do dostawców.</span>
+                </a>
+            {% elif uzytkownik_aplikacji.rola == 'admin' %}
+                <a href="{% url 'panel_admin' %}" class="quick-card">
+                    <strong>Panel administratora</strong>
+                    <span>Podgląd danych oraz zarządzanie aplikacją.</span>
+                </a>
+
+                <a href="{% url 'dodaj_uzytkownika' %}" class="quick-card">
+                    <strong>Dodaj użytkownika</strong>
+                    <span>Utwórz konto i nadaj rolę użytkownikowi.</span>
+                </a>
+
+                <a href="/admin/" class="quick-card">
+                    <strong>Django Admin</strong>
+                    <span>Techniczny panel administracyjny projektu.</span>
+                </a>
+            {% endif %}
+        </div>
+    {% else %}
+        <h2 class="section-title">Zakres działania systemu</h2>
+
+        <div class="quick-grid">
+            <div class="quick-card">
+                <strong>Klient</strong>
+                <span>Rejestruje rowery, tworzy zgłoszenia i śledzi status naprawy.</span>
+            </div>
+
+            <div class="quick-card">
+                <strong>Mechanik</strong>
+                <span>Obsługuje zlecenia, diagnozuje usterki i tworzy raporty napraw.</span>
+            </div>
+
+            <div class="quick-card">
+                <strong>Magazynier</strong>
+                <span>Zarządza częściami, stanami magazynowymi i zamówieniami.</span>
+            </div>
+        </div>
+    {% endif %}
+</section>
 
 {% endblock %}

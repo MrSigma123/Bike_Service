@@ -467,14 +467,28 @@
             <nav>
                 <a href="{% url 'home' %}">Strona główna</a>
 
-                {% if user.is_authenticated %}
-                    <a href="{% url 'rowery' %}">Rowery</a>
-                    <a href="{% url 'zgloszenia' %}">Zgłoszenia</a>
-                    <a href="{% url 'czesci' %}">Części</a>
-                    <a href="{% url 'panel_klienta' %}">Panel klienta</a>
-                    <a href="{% url 'panel_mechanika' %}">Panel mechanika</a>
-                    <a href="{% url 'panel_magazyniera' %}">Panel magazyniera</a>
-                    <a href="{% url 'panel_admin' %}">Panel admina</a>
+                {% if user.is_authenticated and uzytkownik_aplikacji %}
+
+                    {% if uzytkownik_aplikacji.rola == 'klient' %}
+                        <a href="{% url 'panel_klienta' %}">Panel klienta</a>
+                        <a href="{% url 'rowery' %}">Moje rowery</a>
+                        <a href="{% url 'zgloszenia' %}">Moje zgłoszenia</a>
+                    {% elif uzytkownik_aplikacji.rola == 'mechanik' %}
+                        <a href="{% url 'panel_mechanika' %}">Panel mechanika</a>
+                        <a href="{% url 'zlecenia' %}">Zlecenia</a>
+                        <a href="{% url 'zgloszenia' %}">Zgłoszenia</a>
+                        <a href="{% url 'czesci' %}">Części</a>
+                    {% elif uzytkownik_aplikacji.rola == 'magazynier' %}
+                        <a href="{% url 'panel_magazyniera' %}">Panel magazyniera</a>
+                        <a href="{% url 'czesci' %}">Części</a>
+                        <a href="{% url 'zamowienia_czesci' %}">Zamówienia części</a>
+                    {% elif uzytkownik_aplikacji.rola == 'admin' %}
+                        <a href="{% url 'panel_admin' %}">Panel admina</a>
+                        <a href="{% url 'rowery' %}">Rowery</a>
+                        <a href="{% url 'zgloszenia' %}">Zgłoszenia</a>
+                        <a href="{% url 'czesci' %}">Części</a>
+                    {% endif %}
+
                 {% endif %}
             </nav>
         </div>
