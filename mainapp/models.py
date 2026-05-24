@@ -293,3 +293,16 @@ class ZamowienieCzesci(models.Model):
     def __str__(self):
         return f"Zamówienie #{self.id} - {self.dostawca}"
         
+class PozycjaZamowienia(models.Model):
+    zamowienie = models.ForeignKey(ZamowienieCzesci, on_delete=models.CASCADE, related_name='pozycje')
+    czesc = models.ForeignKey(Czesc, on_delete=models.CASCADE, related_name='pozycje_zamowien')
+    ilosc = models.PositiveIntegerField()
+    cena_jednostkowa = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        verbose_name = "Pozycja zamówienia"
+        verbose_name_plural = "Pozycje zamówień"
+
+    def __str__(self):
+        return f"{self.czesc} x {self.ilosc}"
+        
