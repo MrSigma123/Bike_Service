@@ -377,3 +377,16 @@ class WykonanaUsluga(models.Model):
     def __str__(self):
         return f"{self.usluga} - {self.zlecenie}"
         
+class NotatkaSerwisowa(models.Model):
+    zlecenie = models.ForeignKey(ZlecenieSerwisowe, on_delete=models.CASCADE, related_name='notatki')
+    autor = models.ForeignKey(Uzytkownik, on_delete=models.CASCADE, related_name='notatki_serwisowe')
+    tresc = models.TextField()
+    data_dodania = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Notatka serwisowa"
+        verbose_name_plural = "Notatki serwisowe"
+
+    def __str__(self):
+        return f"Notatka #{self.id} - {self.zlecenie}"
+        
