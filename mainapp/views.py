@@ -166,21 +166,42 @@ def dodaj_uzytkownika(request):
 
 @login_required
 def rowery(request):
-    rowery = Rower.objects.all()
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
+
+    if uzytkownik is None:
+        messages.error(request, 'Brak profilu użytkownika aplikacji.')
+        return redirect('home')
+
+    if uzytkownik.rola == 'klient':
+        rowery = Rower.objects.filter(klient=uzytkownik)
+    else:
+        rowery = Rower.objects.all()
+
     return render(request, 'rowery.html', {'rowery': rowery})
 
 
 @login_required
 def zgloszenia(request):
-    zgloszenia = Zgloszenie.objects.all()
-    return render(request, 'zgloszenia.html', {'zgloszenia': zgloszenia})
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
 
+    if uzytkownik is None:
+        messages.error(request, 'Brak profilu użytkownika aplikacji.')
+        return redirect('home')
+
+    if uzytkownik.rola == 'klient':
+        zgloszenia = Zgloszenie.objects.filter(klient=uzytkownik)
+    else:
+        zgloszenia = Zgloszenie.objects.all()
+
+    return render(request, 'zgloszenia.html', {'zgloszenia': zgloszenia})
 
 @login_required
 def czesci(request):
+    if not wymagaj_roli(request, ['mechanik', 'magazynier', 'admin'], 'Brak dostępu do magazynu części.'):
+        return redirect('home')
+
     czesci = Czesc.objects.all()
     return render(request, 'czesci.html', {'czesci': czesci})
-
 
 @login_required
 def dodaj_rower(request):
