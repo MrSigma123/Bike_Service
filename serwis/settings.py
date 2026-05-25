@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import dj_database_url
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -55,14 +56,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'serwis.wsgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'serwis_rowerowy'),
-        'USER': os.getenv('DB_USER', 'serwis_user'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'serwis123'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5432'),
-    }
+    'default': dj_database_url.config(
+        default='postgresql://serwis_user:serwis123@localhost:5432/serwis_rowerowy',
+        conn_max_age=600,
+        ssl_require=os.getenv('DB_SSL_REQUIRE', 'False') == 'True',
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = []
