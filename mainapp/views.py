@@ -6,6 +6,8 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth import login
 from django.db import transaction
 
+from django.db.models import F
+
 from .forms import (
     RowerForm,
     ZgloszenieForm,
@@ -387,7 +389,7 @@ def panel_magazyniera(request):
         'czesci': Czesc.objects.all(),
         'zamowienia': ZamowienieCzesci.objects.all().order_by('-data_zamowienia')[:10],
         'liczba_czesci': Czesc.objects.count(),
-        'czesci_niski_stan': Czesc.objects.filter(stan_magazynowy__lte=5),
+        'czesci_niski_stan': Czesc.objects.filter(stan_magazynowy__lte=F('stan_minimalny')),
     }
 
     return render(request, 'panel_magazyniera.html', context)
