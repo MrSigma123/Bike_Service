@@ -29,6 +29,7 @@ from .forms import (
     TerminSerwisuForm,
     WykonanaUslugaForm,
     UzytkownikProfilForm,
+    OperacjaMagazynowaForm,
 )
 
 from .models import (
@@ -51,6 +52,7 @@ from .models import (
     NotatkaSerwisowa,
     TerminSerwisu,
     WykonanaUsluga,
+    Magazyn,
 )
 
 def pobierz_uzytkownika_aplikacji(request):
@@ -242,6 +244,49 @@ def czesci(request):
 
     czesci = Czesc.objects.all()
     return render(request, 'czesci.html', {'czesci': czesci})
+    
+@login_required
+def szczegoly_czesci(request, czesc_id):
+    if not wymagaj_roli(request, ['mechanik', 'magazynier', 'admin'], 'Brak dostępu do szczegółów części.'):
+        return redirect('home')
+
+    czesc = get_object_or_404(Czesc, id=czesc_id)
+
+    zuzycia = ZuzytaCzesc.objects.filter(czesc=czesc).select_related('zlecenie').order_by('-id')
+    operacje = Magazyn.objects.filter(czesc=czesc).order_by('-id')
+    pozycje_zamowien = PozycjaZamowienia.objects.filter(czesc=czesc).select_related('zamowienie').order_by('-id')
+
+    return render(request, 'szczegoly_czesci.html', {
+        'czesc': czesc,
+        'zuzycia': zuzycia,
+        'operacje': operacje,
+        'pozycje_zamowien': pozycje_zamowien,
+    })
+
+
+@login_required
+def edytuj_czesc(request, czesc_id):
+    if not wymagaj_roli(request, ['magazynier', 'admin'], 'Tylko magazynier lub admin może edytować części.'):
+        return redirect('home')
+
+    czesc = get_object_or_404(Czesc, id=czesc_id)
+
+    if request.method == 'POST':
+        form = CzescForm(request.POST, instance=czesc)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Część została zaktualizowana.')
+            return redirect('szczegoly_czesci', czesc_id=czesc.id)
+    else:
+        form = CzescForm(instance=czesc)
+
+    return render(request, 'formularz.html', {
+        'form': form,
+        'tytul': f'Edytuj część: {czesc.nazwa}',
+        'przycisk': 'Zapisz zmiany',
+        'powrot_url': reverse('szczegoly_czesci', args=[czesc.id]),
+    })
     
 @login_required
 def szczegoly_czesci(request, czesc_id):
@@ -992,24 +1037,33 @@ def dodaj_operacje_magazynowa(request):
         form = OperacjaMagazynowaForm(request.POST)
 
         if form.is_valid():
-            operacja = form.save()
+            operacja = form.save(commit=False)
             czesc = operacja.czesc
-            typ = str(operacja.typ_operacji).lower()
+            typ_operacji = str(operacja.typ_operacji).lower()
 
-            if typ in ['przyjecie', 'przyjęcie', 'dostawa', 'plus']:
+            if typ_operacji in ['przyjecie', 'przyjęcie', 'dostawa', 'plus']:
                 czesc.stan_magazynowy += operacja.ilosc
                 czesc.save()
-            elif typ in ['wydanie', 'minus']:
+                operacja.save()
+
+                messages.success(request, 'Przyjęcie magazynowe zostało zapisane.')
+                return redirect('magazyn')
+
+            if typ_operacji in ['wydanie', 'minus']:
                 if operacja.ilosc > czesc.stan_magazynowy:
-                    messages.error(request, 'Nie można wydać więcej części niż jest w magazynie.')
-                    operacja.delete()
+                    messages.error(request, 'Nie można wydać więcej części niż znajduje się w magazynie.')
                     return redirect('dodaj_operacje_magazynowa')
 
                 czesc.stan_magazynowy -= operacja.ilosc
                 czesc.save()
+                operacja.save()
 
+                messages.success(request, 'Wydanie magazynowe zostało zapisane.')
+                return redirect('magazyn')
+
+            operacja.save()
             messages.success(request, 'Operacja magazynowa została zapisana.')
-            return redirect('czesci')
+            return redirect('magazyn')
     else:
         form = OperacjaMagazynowaForm()
 
@@ -1017,7 +1071,7 @@ def dodaj_operacje_magazynowa(request):
         'form': form,
         'tytul': 'Dodaj operację magazynową',
         'przycisk': 'Zapisz operację',
-        'powrot_url': reverse('czesci'),
+        'powrot_url': reverse('magazyn'),
     })
     
 @login_required
@@ -1076,5 +1130,16 @@ def edytuj_uzytkownika_aplikacji(request, uzytkownik_id):
         'tytul': f'Edytuj profil: {uzytkownik}',
         'przycisk': 'Zapisz profil',
         'powrot_url': reverse('szczegoly_uzytkownika', args=[uzytkownik.id]),
+    })
+    
+@login_required
+def magazyn(request):
+    if not wymagaj_roli(request, ['magazynier', 'admin'], 'Tylko magazynier lub admin ma dostęp do magazynu.'):
+        return redirect('home')
+
+    operacje = Magazyn.objects.select_related('czesc').order_by('-id')
+
+    return render(request, 'magazyn.html', {
+        'operacje': operacje,
     })
     

@@ -18,6 +18,9 @@ urlpatterns = [
     path('zgloszenia/dodaj/', views.dodaj_zgloszenie, name='dodaj_zgloszenie'),
 
     path('czesci/', views.czesci, name='czesci'),
+    path('czesci/dodaj/', views.dodaj_czesc, name='dodaj_czesc'),
+    path('czesci/<int:czesc_id>/', views.szczegoly_czesci, name='szczegoly_czesci'),
+    path('czesci/<int:czesc_id>/edytuj/', views.edytuj_czesc, name='edytuj_czesc'),
     
     path('panel-admin/uzytkownicy/dodaj/', views.dodaj_uzytkownika, name='dodaj_uzytkownika'),
     
@@ -35,8 +38,6 @@ urlpatterns = [
     path('diagnozy/dodaj/', views.dodaj_diagnoze, name='dodaj_diagnoze'),
     path('raporty/dodaj/', views.dodaj_raport, name='dodaj_raport'),
     path('zuzyte-czesci/dodaj/', views.dodaj_zuzyta_czesc, name='dodaj_zuzyta_czesc'),
-
-    path('czesci/dodaj/', views.dodaj_czesc, name='dodaj_czesc'),
 
     path('zamowienia-czesci/', views.zamowienia_czesci, name='zamowienia_czesci'),
     path('zamowienia-czesci/dodaj/', views.dodaj_zamowienie_czesci, name='dodaj_zamowienie_czesci'),
@@ -65,4 +66,7 @@ urlpatterns = [
     
     path('czesci/<int:czesc_id>/', views.szczegoly_czesci, name='szczegoly_czesci'),
     path('czesci/<int:czesc_id>/edytuj/', views.edytuj_czesc, name='edytuj_czesc'),
+    
+    path('magazyn/', views.magazyn, name='magazyn'),
+    path('magazyn/operacja/dodaj/', views.dodaj_operacje_magazynowa, name='dodaj_operacje_magazynowa'),
 ]
