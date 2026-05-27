@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Szczegóły części{% endblock %}
+
+{% block content %}
+
+<h2>{{ czesc.nazwa }}</h2>
+
+<div class="actions">
+    {% if uzytkownik_aplikacji.rola == 'magazynier' or uzytkownik_aplikacji.rola == 'admin' %}
+        <a href="{% url 'edytuj_czesc' czesc.id %}" class="btn">Edytuj część</a>
+        <a href="{% url 'dodaj_operacje_magazynowa' %}" class="btn">Dodaj operację magazynową</a>
+    {% endif %}
+
+    <a href="{% url 'czesci' %}" class="btn btn-secondary">Powrót do części</a>
+</div>
+
+<div class="stats">
+    <div class="card">
+        <h3>Dane części</h3>
+        <p><strong>Nazwa:</strong> {{ czesc.nazwa }}</p>
+        <p><strong>Kategoria:</strong> {{ czesc.kategoria }}</p>
+        <p><strong>Cena:</strong> {{ czesc.cena }} zł</p>
+    </div>
+
+    <div class="card">
+        <h3>Magazyn</h3>
+        <p><strong>Stan magazynowy:</strong> {{ czesc.stan_magazynowy }}</p>
+        <p><strong>Stan minimalny:</strong> {{ czesc.stan_minimalny }}</p>
+
+        {% if czesc.stan_magazynowy <= czesc.stan_minimalny %}
+            <p><span class="badge">Niski stan magazynowy</span></p>
+        {% else %}
+            <p><span class="badge">Stan prawidłowy</span></p>
+        {% endif %}
+    </div>
+</div>
+
+<h2 class="section-title">Zużycie części w zleceniach</h2>
+
+<table>
+    <tr>
+        <th>Zlecenie</th>
+        <th>Ilość</th>
+        <th>Akcje</th>
+    </tr>
+
+    {% for z in zuzycia %}
+    <tr>
+        <td>#{{ z.zlecenie.id }}</td>
+        <td>{{ z.ilosc }}</td>
+        <td>
+            <a href="{% url 'szczegoly_zlecenia' z.zlecenie.id %}" class="btn">Zlecenie</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="3">Ta część nie była jeszcze użyta w żadnym zleceniu.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h2 class="section-title">Operacje magazynowe</h2>
+
+<table>
+    <tr>
+        <th>Typ operacji</th>
+        <th>Ilość</th>
+    </tr>
+
+    {% for o in operacje %}
+    <tr>
+        <td>{{ o.typ_operacji }}</td>
+        <td>{{ o.ilosc }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="2">Brak operacji magazynowych dla tej części.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h2 class="section-title">Pozycje zamówień</h2>
+
+<table>
+    <tr>
+        <th>Zamówienie</th>
+        <th>Ilość</th>
+        <th>Cena jednostkowa</th>
+    </tr>
+
+    {% for p in pozycje_zamowien %}
+    <tr>
+        <td>#{{ p.zamowienie.id }}</td>
+        <td>{{ p.ilosc }}</td>
+        <td>{{ p.cena_jednostkowa }} zł</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="3">Ta część nie występuje jeszcze w zamówieniach.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

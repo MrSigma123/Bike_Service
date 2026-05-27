@@ -14,7 +14,14 @@
 
     {% for czesc in czesci %}
     <tr>
-        <td>{{ czesc.nazwa }}</td>
+        <td>
+            <a href="{% url 'szczegoly_czesci' czesc.id %}">
+                {{ czesc.nazwa }}
+            </a>
+            {% if uzytkownik_aplikacji.rola == 'magazynier' or uzytkownik_aplikacji.rola == 'admin' %}
+                <a href="{% url 'edytuj_czesc' c.id %}" class="btn">Edytuj</a>
+            {% endif %}
+        </td>
         <td>{{ czesc.stan_magazynowy }}</td>
         <td>{{ czesc.cena }} zł</td>
     </tr>
