@@ -5,6 +5,13 @@
 {% block content %}
 <h2>Panel magazyniera</h2>
 
+<a href="{% url 'czesci' %}" class="btn">Części</a>
+<a href="{% url 'dodaj_czesc' %}" class="btn">Dodaj część</a>
+<a href="{% url 'dodaj_dostawce' %}" class="btn">Dodaj dostawcę</a>
+<a href="{% url 'zamowienia_czesci' %}" class="btn">Zamówienia części</a>
+<a href="{% url 'dodaj_zamowienie_czesci' %}" class="btn">Dodaj zamówienie</a>
+<a href="{% url 'dodaj_operacje_magazynowa' %}" class="btn">Operacja magazynowa</a>
+
 <div class="stats">
     <div class="card">
         <h3>Części</h3>

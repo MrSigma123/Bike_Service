@@ -55,4 +55,7 @@ urlpatterns = [
     path('zlecenia/<int:zlecenie_id>/notatka/dodaj/', views.dodaj_notatke_serwisowa, name='dodaj_notatke_serwisowa'),
     path('zlecenia/<int:zlecenie_id>/termin/dodaj/', views.dodaj_termin_serwisu, name='dodaj_termin_serwisu'),
     path('zlecenia/<int:zlecenie_id>/usluga/dodaj/', views.dodaj_wykonana_usluga, name='dodaj_wykonana_usluga'),
+    
+    path('dostawcy/dodaj/', views.dodaj_dostawce, name='dodaj_dostawce'),
+    path('magazyn/operacja/dodaj/', views.dodaj_operacje_magazynowa, name='dodaj_operacje_magazynowa'),
 ]

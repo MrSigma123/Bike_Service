@@ -424,3 +424,28 @@ class WykonanaUslugaForm(forms.ModelForm):
             raise forms.ValidationError('Ilość musi być większa od zera.')
 
         return ilosc
+
+class DostawcaForm(forms.ModelForm):
+    class Meta:
+        model = Dostawca
+        fields = ['nazwa', 'nip', 'email', 'telefon', 'adres']
+
+
+class OperacjaMagazynowaForm(forms.ModelForm):
+    class Meta:
+        model = Magazyn
+        fields = ['czesc', 'ilosc', 'typ_operacji']
+        labels = {
+            'czesc': 'Część',
+            'ilosc': 'Ilość',
+            'typ_operacji': 'Typ operacji',
+        }
+
+    def clean_ilosc(self):
+        ilosc = self.cleaned_data.get('ilosc')
+
+        if ilosc <= 0:
+            raise forms.ValidationError('Ilość musi być większa od zera.')
+
+        return ilosc
+        

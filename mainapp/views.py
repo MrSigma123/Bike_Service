@@ -910,3 +910,61 @@ def dodaj_wykonana_usluga(request, zlecenie_id):
         'przycisk': 'Zapisz usługę',
     })
     
+@login_required
+def dodaj_dostawce(request):
+    if not wymagaj_roli(request, ['magazynier', 'admin'], 'Tylko magazynier lub admin może dodać dostawcę.'):
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = DostawcaForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Dostawca został dodany.')
+            return redirect('panel_magazyniera')
+    else:
+        form = DostawcaForm()
+
+    return render(request, 'formularz.html', {
+        'form': form,
+        'tytul': 'Dodaj dostawcę',
+        'przycisk': 'Zapisz dostawcę',
+    })
+
+
+@login_required
+def dodaj_operacje_magazynowa(request):
+    if not wymagaj_roli(request, ['magazynier', 'admin'], 'Tylko magazynier lub admin może dodać operację magazynową.'):
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = OperacjaMagazynowaForm(request.POST)
+
+        if form.is_valid():
+            operacja = form.save()
+            czesc = operacja.czesc
+            typ = str(operacja.typ_operacji).lower()
+
+            if typ in ['przyjecie', 'przyjęcie', 'dostawa', 'plus']:
+                czesc.stan_magazynowy += operacja.ilosc
+                czesc.save()
+            elif typ in ['wydanie', 'minus']:
+                if operacja.ilosc > czesc.stan_magazynowy:
+                    messages.error(request, 'Nie można wydać więcej części niż jest w magazynie.')
+                    operacja.delete()
+                    return redirect('dodaj_operacje_magazynowa')
+
+                czesc.stan_magazynowy -= operacja.ilosc
+                czesc.save()
+
+            messages.success(request, 'Operacja magazynowa została zapisana.')
+            return redirect('czesci')
+    else:
+        form = OperacjaMagazynowaForm()
+
+    return render(request, 'formularz.html', {
+        'form': form,
+        'tytul': 'Dodaj operację magazynową',
+        'przycisk': 'Zapisz operację',
+    })
+    
