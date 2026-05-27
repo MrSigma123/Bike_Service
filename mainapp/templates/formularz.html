@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tytul }}{% endblock %}
+
+{% block content %}
+<h2>{{ tytul }}</h2>
+
+<form method="post" class="form-box">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div class="actions">
+        <button type="submit" class="btn">{{ przycisk }}</button>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Powrót</a>
+    </div>
+</form>
+{% endblock %}

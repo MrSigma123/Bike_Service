@@ -21,7 +21,10 @@ from .forms import (
     PlatnoscForm,
     PozycjaZamowieniaForm,
     StatusZleceniaForm,
+    AdresForm,
+    KontaktForm,
 )
+
 from .models import (
     Czesc,
     Diagnoza,
@@ -37,6 +40,8 @@ from .models import (
     HistoriaStatusu,
     Platnosc,
     PozycjaZamowienia,
+    Adres,
+    Kontakt,
 )
 
 def pobierz_uzytkownika_aplikacji(request):
@@ -707,3 +712,85 @@ def zmien_status(request, zlecenie_id):
         form = StatusZleceniaForm(instance=zlecenie)
 
     return render(request, 'zmien_status.html', {'form': form, 'zlecenie': zlecenie})
+    
+@login_required
+def moje_dane(request):
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
+
+    if uzytkownik is None:
+        messages.error(request, 'Brak profilu użytkownika aplikacji.')
+        return redirect('home')
+
+    adres = Adres.objects.filter(uzytkownik=uzytkownik).first()
+    kontakt = Kontakt.objects.filter(uzytkownik=uzytkownik).first()
+
+    return render(request, 'moje_dane.html', {
+        'adres': adres,
+        'kontakt': kontakt,
+    })
+
+
+@login_required
+def edytuj_adres(request):
+    if not wymagaj_roli(request, ['klient', 'admin'], 'Brak dostępu do edycji adresu.'):
+        return redirect('home')
+
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
+
+    if uzytkownik is None:
+        messages.error(request, 'Brak profilu użytkownika aplikacji.')
+        return redirect('home')
+
+    adres = Adres.objects.filter(uzytkownik=uzytkownik).first()
+
+    if request.method == 'POST':
+        form = AdresForm(request.POST, instance=adres)
+
+        if form.is_valid():
+            adres = form.save(commit=False)
+            adres.uzytkownik = uzytkownik
+            adres.save()
+
+            messages.success(request, 'Adres został zapisany.')
+            return redirect('moje_dane')
+    else:
+        form = AdresForm(instance=adres)
+
+    return render(request, 'formularz.html', {
+        'form': form,
+        'tytul': 'Edytuj adres',
+        'przycisk': 'Zapisz adres',
+    })
+
+
+@login_required
+def edytuj_kontakt(request):
+    if not wymagaj_roli(request, ['klient', 'admin'], 'Brak dostępu do edycji kontaktu.'):
+        return redirect('home')
+
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
+
+    if uzytkownik is None:
+        messages.error(request, 'Brak profilu użytkownika aplikacji.')
+        return redirect('home')
+
+    kontakt = Kontakt.objects.filter(uzytkownik=uzytkownik).first()
+
+    if request.method == 'POST':
+        form = KontaktForm(request.POST, instance=kontakt)
+
+        if form.is_valid():
+            kontakt = form.save(commit=False)
+            kontakt.uzytkownik = uzytkownik
+            kontakt.save()
+
+            messages.success(request, 'Dane kontaktowe zostały zapisane.')
+            return redirect('moje_dane')
+    else:
+        form = KontaktForm(instance=kontakt)
+
+    return render(request, 'formularz.html', {
+        'form': form,
+        'tytul': 'Edytuj kontakt',
+        'przycisk': 'Zapisz kontakt',
+    })

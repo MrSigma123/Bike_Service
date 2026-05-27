@@ -14,6 +14,8 @@ from .models import (
     Platnosc,
     PozycjaZamowienia,
     ZlecenieSerwisowe,
+    Adres,
+    Kontakt,
 )
 
 POLISH_NAME_PATTERN = re.compile(r'^[A-Za-zĄąĆćĘęŁłŃńÓóŚśŹźŻż\-\s]+$')
@@ -326,3 +328,59 @@ class StatusZleceniaForm(forms.ModelForm):
             'status': 'Nowy status',
         }
     
+class AdresForm(forms.ModelForm):
+    class Meta:
+        model = Adres
+        fields = [
+            'ulica',
+            'numer_budynku',
+            'numer_lokalu',
+            'kod_pocztowy',
+            'miasto',
+        ]
+        labels = {
+            'ulica': 'Ulica',
+            'numer_budynku': 'Numer budynku',
+            'numer_lokalu': 'Numer lokalu',
+            'kod_pocztowy': 'Kod pocztowy',
+            'miasto': 'Miasto',
+        }
+
+    def clean_ulica(self):
+        ulica = self.cleaned_data.get('ulica', '').strip()
+
+        if len(ulica) < 2:
+            raise forms.ValidationError('Ulica musi mieć co najmniej 2 znaki.')
+
+        return ulica
+
+    def clean_miasto(self):
+        miasto = self.cleaned_data.get('miasto', '').strip()
+
+        if len(miasto) < 2:
+            raise forms.ValidationError('Miasto musi mieć co najmniej 2 znaki.')
+
+        return miasto
+
+class KontaktForm(forms.ModelForm):
+    class Meta:
+        model = Kontakt
+        fields = [
+            'telefon',
+            'dodatkowy_email',
+            'preferowany_kontakt',
+        ]
+        labels = {
+            'telefon': 'Telefon',
+            'dodatkowy_email': 'Dodatkowy email',
+            'preferowany_kontakt': 'Preferowany kontakt',
+        }
+
+    def clean_telefon(self):
+        telefon = self.cleaned_data.get('telefon', '').strip()
+
+        if len(telefon) < 7:
+            raise forms.ValidationError('Numer telefonu musi mieć co najmniej 7 znaków.')
+
+        return telefon
+        

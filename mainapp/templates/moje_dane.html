@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Moje dane{% endblock %}
+
+{% block content %}
+<h2>Moje dane</h2>
+
+<div class="stats">
+    <div class="card">
+        <h3>Adres</h3>
+
+        {% if adres %}
+            <p>{{ adres.ulica }} {{ adres.numer_budynku }}{% if adres.numer_lokalu %}/{{ adres.numer_lokalu }}{% endif %}</p>
+            <p>{{ adres.kod_pocztowy }} {{ adres.miasto }}</p>
+        {% else %}
+            <p>Brak adresu.</p>
+        {% endif %}
+
+        <a href="{% url 'edytuj_adres' %}" class="btn">Edytuj adres</a>
+    </div>
+
+    <div class="card">
+        <h3>Kontakt</h3>
+
+        {% if kontakt %}
+            <p>Telefon: {{ kontakt.telefon }}</p>
+            <p>Email dodatkowy: {{ kontakt.dodatkowy_email }}</p>
+            <p>Preferowany kontakt: {{ kontakt.preferowany_kontakt }}</p>
+        {% else %}
+            <p>Brak danych kontaktowych.</p>
+        {% endif %}
+
+        <a href="{% url 'edytuj_kontakt' %}" class="btn">Edytuj kontakt</a>
+    </div>
+</div>
+{% endblock %}

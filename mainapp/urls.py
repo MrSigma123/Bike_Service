@@ -47,4 +47,8 @@ urlpatterns = [
     path('platnosci/dodaj/', views.dodaj_platnosc, name='dodaj_platnosc'),
     
     path('pozycje-zamowienia/dodaj/', views.dodaj_pozycje_zamowienia, name='dodaj_pozycje_zamowienia'),
+    
+    path('moje-dane/', views.moje_dane, name='moje_dane'),
+    path('moje-dane/adres/', views.edytuj_adres, name='edytuj_adres'),
+    path('moje-dane/kontakt/', views.edytuj_kontakt, name='edytuj_kontakt'),
 ]
