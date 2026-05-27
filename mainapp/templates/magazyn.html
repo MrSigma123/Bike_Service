@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Magazyn{% endblock %}
+
+{% block content %}
+
+<h2>Operacje magazynowe</h2>
+
+<div class="actions">
+    <a href="{% url 'dodaj_operacje_magazynowa' %}" class="btn">Dodaj operację magazynową</a>
+    <a href="{% url 'czesci' %}" class="btn btn-secondary">Części</a>
+</div>
+
+<table>
+    <tr>
+        <th>Część</th>
+        <th>Typ operacji</th>
+        <th>Ilość</th>
+        <th>Akcje</th>
+    </tr>
+
+    {% for operacja in operacje %}
+    <tr>
+        <td>
+            <a href="{% url 'szczegoly_czesci' operacja.czesc.id %}">
+                {{ operacja.czesc.nazwa }}
+            </a>
+        </td>
+        <td>{{ operacja.typ_operacji }}</td>
+        <td>{{ operacja.ilosc }}</td>
+        <td>
+            <a href="{% url 'szczegoly_czesci' operacja.czesc.id %}" class="btn">Część</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="4">Brak operacji magazynowych.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

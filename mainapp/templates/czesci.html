@@ -5,11 +5,19 @@
 {% block content %}
 <h2>Magazyn części</h2>
 
+<div class="actions">
+    {% if uzytkownik_aplikacji.rola == 'magazynier' or uzytkownik_aplikacji.rola == 'admin' %}
+        <a href="{% url 'dodaj_czesc' %}" class="btn">Dodaj część</a>
+        <a href="{% url 'dodaj_operacje_magazynowa' %}" class="btn">Dodaj operację magazynową</a>
+    {% endif %}
+</div>
+
 <table>
     <tr>
         <th>Nazwa</th>
         <th>Stan</th>
         <th>Cena</th>
+        <th>Akcje</th>
     </tr>
 
     {% for czesc in czesci %}
@@ -18,16 +26,20 @@
             <a href="{% url 'szczegoly_czesci' czesc.id %}">
                 {{ czesc.nazwa }}
             </a>
-            {% if uzytkownik_aplikacji.rola == 'magazynier' or uzytkownik_aplikacji.rola == 'admin' %}
-                <a href="{% url 'edytuj_czesc' c.id %}" class="btn">Edytuj</a>
-            {% endif %}
         </td>
         <td>{{ czesc.stan_magazynowy }}</td>
         <td>{{ czesc.cena }} zł</td>
+        <td>
+            <a href="{% url 'szczegoly_czesci' czesc.id %}" class="btn">Szczegóły</a>
+
+            {% if uzytkownik_aplikacji.rola == 'magazynier' or uzytkownik_aplikacji.rola == 'admin' %}
+                <a href="{% url 'edytuj_czesc' czesc.id %}" class="btn">Edytuj</a>
+            {% endif %}
+        </td>
     </tr>
     {% empty %}
     <tr>
-        <td colspan="3">Brak części</td>
+        <td colspan="4">Brak części</td>
     </tr>
     {% endfor %}
 </table>

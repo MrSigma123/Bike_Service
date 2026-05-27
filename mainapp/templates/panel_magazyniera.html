@@ -3,48 +3,93 @@
 {% block title %}Panel magazyniera{% endblock %}
 
 {% block content %}
+
 <h2>Panel magazyniera</h2>
 
-<a href="{% url 'czesci' %}" class="btn">Części</a>
-<a href="{% url 'dodaj_czesc' %}" class="btn">Dodaj część</a>
-<a href="{% url 'dodaj_dostawce' %}" class="btn">Dodaj dostawcę</a>
-<a href="{% url 'zamowienia_czesci' %}" class="btn">Zamówienia części</a>
-<a href="{% url 'dodaj_zamowienie_czesci' %}" class="btn">Dodaj zamówienie</a>
-<a href="{% url 'dodaj_operacje_magazynowa' %}" class="btn">Operacja magazynowa</a>
+<p>
+    Panel służy do zarządzania częściami, dostawcami, zamówieniami oraz operacjami magazynowymi.
+</p>
 
 <div class="stats">
     <div class="card">
-        <h3>Części</h3>
+        <h3>Części w systemie</h3>
         <p class="stat-number">{{ liczba_czesci }}</p>
     </div>
 
     <div class="card">
-        <h3>Niski stan</h3>
+        <h3>Niski stan magazynowy</h3>
         <p class="stat-number">{{ czesci_niski_stan.count }}</p>
     </div>
 </div>
 
-<h2 class="section-title">Szybkie akcje</h2>
+<h2 class="section-title">Zarządzanie magazynem</h2>
 
 <div class="quick-grid">
     <a href="{% url 'czesci' %}" class="quick-card">
-        <strong>Lista części</strong>
-        <span>Przegląd magazynu części.</span>
+        <strong>Części</strong>
+        <span>Przegląd części, stanów magazynowych oraz szczegółów części.</span>
     </a>
 
     <a href="{% url 'dodaj_czesc' %}" class="quick-card">
         <strong>Dodaj część</strong>
-        <span>Dodaj nową część do systemu.</span>
+        <span>Dodanie nowej części do magazynu serwisu.</span>
+    </a>
+
+    <a href="{% url 'magazyn' %}" class="quick-card">
+        <strong>Magazyn</strong>
+        <span>Historia przyjęć i wydań części magazynowych.</span>
+    </a>
+
+    <a href="{% url 'dodaj_operacje_magazynowa' %}" class="quick-card">
+        <strong>Operacja magazynowa</strong>
+        <span>Przyjęcie lub wydanie części z magazynu.</span>
+    </a>
+</div>
+
+<h2 class="section-title">Dostawcy i zamówienia</h2>
+
+<div class="quick-grid">
+    <a href="{% url 'dodaj_dostawce' %}" class="quick-card">
+        <strong>Dodaj dostawcę</strong>
+        <span>Dodanie nowego dostawcy części rowerowych.</span>
     </a>
 
     <a href="{% url 'zamowienia_czesci' %}" class="quick-card">
         <strong>Zamówienia części</strong>
-        <span>Przegląd zamówień do dostawców.</span>
+        <span>Przegląd zamówień części do dostawców.</span>
     </a>
 
     <a href="{% url 'dodaj_zamowienie_czesci' %}" class="quick-card">
         <strong>Dodaj zamówienie</strong>
-        <span>Utwórz nowe zamówienie części.</span>
+        <span>Utworzenie nowego zamówienia części.</span>
     </a>
 </div>
+
+<h2 class="section-title">Części wymagające uwagi</h2>
+
+<table>
+    <tr>
+        <th>Nazwa</th>
+        <th>Stan</th>
+        <th>Stan minimalny</th>
+        <th>Akcje</th>
+    </tr>
+
+    {% for czesc in czesci_niski_stan %}
+    <tr>
+        <td>{{ czesc.nazwa }}</td>
+        <td>{{ czesc.stan_magazynowy }}</td>
+        <td>{{ czesc.stan_minimalny }}</td>
+        <td>
+            <a href="{% url 'szczegoly_czesci' czesc.id %}" class="btn">Szczegóły</a>
+            <a href="{% url 'edytuj_czesc' czesc.id %}" class="btn">Edytuj</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="4">Brak części z niskim stanem magazynowym.</td>
+    </tr>
+    {% endfor %}
+</table>
+
 {% endblock %}
