@@ -3,28 +3,54 @@
 {% block title %}Rowery{% endblock %}
 
 {% block content %}
-<h2>Lista rowerów</h2>
 
-<a href="{% url 'dodaj_rower' %}" class="btn">Dodaj rower</a>
+<h2>Rowery</h2>
+
+<p>
+    Lista rowerów dostępnych zgodnie z uprawnieniami użytkownika.
+    Klient widzi swoje rowery, administrator wszystkie, a mechanik rowery powiązane z jego zleceniami.
+</p>
+
+{% if uzytkownik_aplikacji.rola == 'klient' or uzytkownik_aplikacji.rola == 'admin' %}
+<div class="actions">
+    <a href="{% url 'dodaj_rower' %}" class="btn">Dodaj rower</a>
+</div>
+{% endif %}
 
 <table>
     <tr>
+        <th>Rower</th>
         <th>Marka</th>
         <th>Model</th>
         <th>Typ</th>
+        <th>Numer seryjny</th>
         <th>Klient</th>
+        <th>Akcje</th>
     </tr>
 
     {% for rower in rowery %}
     <tr>
+        <td>
+            <a href="{% url 'szczegoly_roweru' rower.id %}">
+                {{ rower }}
+            </a>
+        </td>
         <td>{{ rower.marka }}</td>
         <td>{{ rower.model }}</td>
         <td>{{ rower.typ }}</td>
+        <td>{{ rower.numer_seryjny|default:"-" }}</td>
         <td>{{ rower.klient }}</td>
+        <td>
+            <a href="{% url 'szczegoly_roweru' rower.id %}" class="btn">Szczegóły</a>
+
+            {% if uzytkownik_aplikacji.rola == 'admin' or rower.klient == uzytkownik_aplikacji %}
+                <a href="{% url 'edytuj_rower' rower.id %}" class="btn">Edytuj</a>
+            {% endif %}
+        </td>
     </tr>
     {% empty %}
     <tr>
-        <td colspan="4">Brak rowerów</td>
+        <td colspan="7">Brak rowerów.</td>
     </tr>
     {% endfor %}
 </table>

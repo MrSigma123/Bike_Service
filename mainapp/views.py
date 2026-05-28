@@ -216,12 +216,24 @@ def rowery(request):
         messages.error(request, 'Brak profilu użytkownika aplikacji.')
         return redirect('home')
 
-    if uzytkownik.rola == 'klient':
-        rowery = Rower.objects.filter(klient=uzytkownik)
-    else:
+    if uzytkownik.rola == 'admin':
         rowery = Rower.objects.all()
 
-    return render(request, 'rowery.html', {'rowery': rowery})
+    elif uzytkownik.rola == 'klient':
+        rowery = Rower.objects.filter(klient=uzytkownik)
+
+    elif uzytkownik.rola == 'mechanik':
+        rowery = Rower.objects.filter(
+            zgloszenie__zlecenieserwisowe__mechanik=uzytkownik
+        ).distinct()
+
+    else:
+        messages.error(request, 'Brak dostępu do listy rowerów.')
+        return redirect('home')
+
+    return render(request, 'rowery.html', {
+        'rowery': rowery,
+    })
 
 
 @login_required
@@ -232,12 +244,26 @@ def zgloszenia(request):
         messages.error(request, 'Brak profilu użytkownika aplikacji.')
         return redirect('home')
 
-    if uzytkownik.rola == 'klient':
-        zgloszenia = Zgloszenie.objects.filter(klient=uzytkownik)
-    else:
+    if uzytkownik.rola == 'admin':
         zgloszenia = Zgloszenie.objects.all()
 
-    return render(request, 'zgloszenia.html', {'zgloszenia': zgloszenia})
+    elif uzytkownik.rola == 'klient':
+        zgloszenia = Zgloszenie.objects.filter(klient=uzytkownik)
+
+    elif uzytkownik.rola == 'mechanik':
+        zgloszenia = Zgloszenie.objects.filter(
+            zlecenieserwisowe__mechanik=uzytkownik
+        ).distinct()
+
+    else:
+        messages.error(request, 'Brak dostępu do zgłoszeń.')
+        return redirect('home')
+
+    zgloszenia = zgloszenia.order_by('-id')
+
+    return render(request, 'zgloszenia.html', {
+        'zgloszenia': zgloszenia,
+    })
 
 @login_required
 def czesci(request):
@@ -1156,3 +1182,162 @@ def edytuj_zlecenie(request, zlecenie_id):
         'przycisk': 'Zapisz zmiany',
         'powrot_url': reverse('szczegoly_zlecenia', args=[zlecenie.id]),
     })
+    
+@login_required
+def szczegoly_roweru(request, rower_id):
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
+
+    if uzytkownik is None:
+        messages.error(request, 'Brak profilu użytkownika aplikacji.')
+        return redirect('home')
+
+    rower = get_object_or_404(Rower, id=rower_id)
+
+    if uzytkownik.rola == 'klient' and rower.klient != uzytkownik:
+        messages.error(request, 'Nie masz dostępu do tego roweru.')
+        return redirect('rowery')
+
+    if uzytkownik.rola == 'mechanik':
+        ma_dostep = ZlecenieSerwisowe.objects.filter(
+            zgloszenie__rower=rower,
+            mechanik=uzytkownik
+        ).exists()
+
+        if not ma_dostep:
+            messages.error(request, 'Nie masz dostępu do tego roweru.')
+            return redirect('rowery')
+
+    if uzytkownik.rola == 'magazynier':
+        messages.error(request, 'Magazynier nie ma dostępu do rowerów klientów.')
+        return redirect('home')
+
+    zgloszenia_roweru = Zgloszenie.objects.filter(rower=rower).order_by('-id')
+    zlecenia_roweru = ZlecenieSerwisowe.objects.filter(
+        zgloszenie__rower=rower
+    ).order_by('-id')
+
+    return render(request, 'szczegoly_roweru.html', {
+        'rower': rower,
+        'zgloszenia_roweru': zgloszenia_roweru,
+        'zlecenia_roweru': zlecenia_roweru,
+    })
+    
+@login_required
+def edytuj_rower(request, rower_id):
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
+
+    if uzytkownik is None:
+        messages.error(request, 'Brak profilu użytkownika aplikacji.')
+        return redirect('home')
+
+    rower = get_object_or_404(Rower, id=rower_id)
+
+    if uzytkownik.rola == 'klient' and rower.klient != uzytkownik:
+        messages.error(request, 'Nie możesz edytować cudzego roweru.')
+        return redirect('rowery')
+
+    if uzytkownik.rola not in ['klient', 'admin']:
+        messages.error(request, 'Brak dostępu do edycji roweru.')
+        return redirect('rowery')
+
+    if request.method == 'POST':
+        form = RowerForm(request.POST, instance=rower)
+
+        if form.is_valid():
+            edytowany_rower = form.save(commit=False)
+
+            if uzytkownik.rola == 'klient':
+                edytowany_rower.klient = uzytkownik
+
+            edytowany_rower.save()
+            messages.success(request, 'Dane roweru zostały zaktualizowane.')
+            return redirect('szczegoly_roweru', rower_id=rower.id)
+    else:
+        form = RowerForm(instance=rower)
+
+    return render(request, 'formularz.html', {
+        'form': form,
+        'tytul': f'Edytuj rower: {rower}',
+        'przycisk': 'Zapisz zmiany',
+        'powrot_url': reverse('szczegoly_roweru', args=[rower.id]),
+    })
+    
+@login_required
+def szczegoly_zgloszenia(request, zgloszenie_id):
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
+
+    if uzytkownik is None:
+        messages.error(request, 'Brak profilu użytkownika aplikacji.')
+        return redirect('home')
+
+    zgloszenie = get_object_or_404(Zgloszenie, id=zgloszenie_id)
+    zlecenie = ZlecenieSerwisowe.objects.filter(zgloszenie=zgloszenie).first()
+
+    if uzytkownik.rola == 'klient' and zgloszenie.klient != uzytkownik:
+        messages.error(request, 'Nie masz dostępu do tego zgłoszenia.')
+        return redirect('zgloszenia')
+
+    if uzytkownik.rola == 'mechanik':
+        if zlecenie is None or zlecenie.mechanik != uzytkownik:
+            messages.error(request, 'Nie masz dostępu do tego zgłoszenia.')
+            return redirect('zgloszenia')
+
+    if uzytkownik.rola == 'magazynier':
+        messages.error(request, 'Magazynier nie ma dostępu do zgłoszeń serwisowych.')
+        return redirect('home')
+
+    return render(request, 'szczegoly_zgloszenia.html', {
+        'zgloszenie': zgloszenie,
+        'zlecenie': zlecenie,
+    })
+    
+@login_required
+def edytuj_zgloszenie(request, zgloszenie_id):
+    uzytkownik = pobierz_uzytkownika_aplikacji(request)
+
+    if uzytkownik is None:
+        messages.error(request, 'Brak profilu użytkownika aplikacji.')
+        return redirect('home')
+
+    zgloszenie = get_object_or_404(Zgloszenie, id=zgloszenie_id)
+
+    if uzytkownik.rola == 'klient' and zgloszenie.klient != uzytkownik:
+        messages.error(request, 'Nie możesz edytować cudzego zgłoszenia.')
+        return redirect('zgloszenia')
+
+    if uzytkownik.rola not in ['klient', 'admin']:
+        messages.error(request, 'Brak dostępu do edycji zgłoszenia.')
+        return redirect('zgloszenia')
+
+    if request.method == 'POST':
+        form = ZgloszenieForm(request.POST, instance=zgloszenie)
+
+        if 'rower' in form.fields and uzytkownik.rola == 'klient':
+            form.fields['rower'].queryset = Rower.objects.filter(klient=uzytkownik)
+
+        if form.is_valid():
+            edytowane_zgloszenie = form.save(commit=False)
+
+            if edytowane_zgloszenie.rower:
+                edytowane_zgloszenie.klient = edytowane_zgloszenie.rower.klient
+
+            if uzytkownik.rola == 'klient' and edytowane_zgloszenie.klient != uzytkownik:
+                messages.error(request, 'Nie możesz przypisać zgłoszenia do cudzego roweru.')
+                return redirect('edytuj_zgloszenie', zgloszenie_id=zgloszenie.id)
+
+            edytowane_zgloszenie.save()
+            messages.success(request, 'Zgłoszenie zostało zaktualizowane.')
+            return redirect('szczegoly_zgloszenia', zgloszenie_id=zgloszenie.id)
+    else:
+        form = ZgloszenieForm(instance=zgloszenie)
+
+        if 'rower' in form.fields and uzytkownik.rola == 'klient':
+            form.fields['rower'].queryset = Rower.objects.filter(klient=uzytkownik)
+
+    return render(request, 'formularz.html', {
+        'form': form,
+        'tytul': f'Edytuj zgłoszenie #{zgloszenie.id}',
+        'przycisk': 'Zapisz zmiany',
+        'powrot_url': reverse('szczegoly_zgloszenia', args=[zgloszenie.id]),
+    })
+    

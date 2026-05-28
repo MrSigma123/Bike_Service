@@ -3,30 +3,55 @@
 {% block title %}Zgłoszenia{% endblock %}
 
 {% block content %}
+
 <h2>Zgłoszenia serwisowe</h2>
 
-<a href="{% url 'dodaj_zgloszenie' %}" class="btn">Dodaj zgłoszenie</a>
+<p>
+    Lista zgłoszeń serwisowych dostępnych zgodnie z uprawnieniami użytkownika.
+    Klient widzi swoje zgłoszenia, mechanik zgłoszenia powiązane z jego zleceniami,
+    a administrator wszystkie zgłoszenia.
+</p>
+
+{% if uzytkownik_aplikacji.rola == 'klient' or uzytkownik_aplikacji.rola == 'admin' %}
+<div class="actions">
+    <a href="{% url 'dodaj_zgloszenie' %}" class="btn">Dodaj zgłoszenie</a>
+</div>
+{% endif %}
 
 <table>
     <tr>
+        <th>ID</th>
         <th>Klient</th>
         <th>Rower</th>
         <th>Opis</th>
         <th>Status</th>
+        <th>Data zgłoszenia</th>
+        <th>Akcje</th>
     </tr>
 
     {% for z in zgloszenia %}
     <tr>
+        <td>
+            <a href="{% url 'szczegoly_zgloszenia' z.id %}">
+                #{{ z.id }}
+            </a>
+        </td>
         <td>{{ z.klient }}</td>
         <td>{{ z.rower }}</td>
         <td>{{ z.opis_usterki }}</td>
+        <td><span class="badge">{{ z.status }}</span></td>
+        <td>{{ z.data_zgloszenia|default:"-" }}</td>
         <td>
-            <span class="badge">{{ z.status }}</span>
+            <a href="{% url 'szczegoly_zgloszenia' z.id %}" class="btn">Szczegóły</a>
+
+            {% if uzytkownik_aplikacji.rola == 'admin' or z.klient == uzytkownik_aplikacji %}
+                <a href="{% url 'edytuj_zgloszenie' z.id %}" class="btn">Edytuj</a>
+            {% endif %}
         </td>
     </tr>
     {% empty %}
     <tr>
-        <td colspan="4">Brak zgłoszeń</td>
+        <td colspan="7">Brak zgłoszeń.</td>
     </tr>
     {% endfor %}
 </table>

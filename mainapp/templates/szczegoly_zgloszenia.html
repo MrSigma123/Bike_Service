@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Szczegóły zgłoszenia{% endblock %}
+
+{% block content %}
+
+<h2>Zgłoszenie #{{ zgloszenie.id }}</h2>
+
+<div class="actions">
+    {% if uzytkownik_aplikacji.rola == 'admin' or zgloszenie.klient == uzytkownik_aplikacji %}
+        <a href="{% url 'edytuj_zgloszenie' zgloszenie.id %}" class="btn">Edytuj zgłoszenie</a>
+    {% endif %}
+
+    {% if zlecenie %}
+        <a href="{% url 'szczegoly_zlecenia' zlecenie.id %}" class="btn">Przejdź do zlecenia</a>
+    {% endif %}
+
+    <a href="{% url 'zgloszenia' %}" class="btn btn-secondary">Powrót do zgłoszeń</a>
+</div>
+
+<div class="stats">
+    <div class="card">
+        <h3>Dane zgłoszenia</h3>
+        <p><strong>Status:</strong> <span class="badge">{{ zgloszenie.status }}</span></p>
+        <p><strong>Data zgłoszenia:</strong> {{ zgloszenie.data_zgloszenia|default:"-" }}</p>
+        <p><strong>Opis usterki:</strong> {{ zgloszenie.opis_usterki }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Klient i rower</h3>
+        <p><strong>Klient:</strong> {{ zgloszenie.klient }}</p>
+        <p><strong>Rower:</strong> {{ zgloszenie.rower }}</p>
+
+        {% if zgloszenie.rower %}
+            <a href="{% url 'szczegoly_roweru' zgloszenie.rower.id %}" class="btn">Szczegóły roweru</a>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Zlecenie serwisowe</h3>
+        {% if zlecenie %}
+            <p><strong>Numer zlecenia:</strong> #{{ zlecenie.id }}</p>
+            <p><strong>Status:</strong> <span class="badge">{{ zlecenie.status }}</span></p>
+            <p><strong>Mechanik:</strong> {{ zlecenie.mechanik|default:"Nieprzypisany" }}</p>
+            <a href="{% url 'szczegoly_zlecenia' zlecenie.id %}" class="btn">Otwórz zlecenie</a>
+        {% else %}
+            <p>Brak zlecenia powiązanego z tym zgłoszeniem.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

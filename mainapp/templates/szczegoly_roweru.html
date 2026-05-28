@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Szczegóły roweru{% endblock %}
+
+{% block content %}
+
+<h2>{{ rower }}</h2>
+
+<div class="actions">
+    {% if uzytkownik_aplikacji.rola == 'admin' or rower.klient == uzytkownik_aplikacji %}
+        <a href="{% url 'edytuj_rower' rower.id %}" class="btn">Edytuj rower</a>
+    {% endif %}
+
+    {% if uzytkownik_aplikacji.rola == 'klient' or uzytkownik_aplikacji.rola == 'admin' %}
+        <a href="{% url 'dodaj_zgloszenie' %}" class="btn">Dodaj zgłoszenie</a>
+    {% endif %}
+
+    <a href="{% url 'rowery' %}" class="btn btn-secondary">Powrót do rowerów</a>
+</div>
+
+<div class="stats">
+    <div class="card">
+        <h3>Dane roweru</h3>
+        <p><strong>Marka:</strong> {{ rower.marka }}</p>
+        <p><strong>Model:</strong> {{ rower.model }}</p>
+        <p><strong>Typ:</strong> {{ rower.typ }}</p>
+        <p><strong>Numer seryjny:</strong> {{ rower.numer_seryjny|default:"-" }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Właściciel</h3>
+        <p>{{ rower.klient }}</p>
+    </div>
+</div>
+
+<h2 class="section-title">Zgłoszenia tego roweru</h2>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Opis</th>
+        <th>Status</th>
+        <th>Akcje</th>
+    </tr>
+
+    {% for z in zgloszenia_roweru %}
+    <tr>
+        <td>#{{ z.id }}</td>
+        <td>{{ z.opis_usterki }}</td>
+        <td><span class="badge">{{ z.status }}</span></td>
+        <td>
+            <a href="{% url 'szczegoly_zgloszenia' z.id %}" class="btn">Zgłoszenie</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="4">Brak zgłoszeń dla tego roweru.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h2 class="section-title">Zlecenia serwisowe tego roweru</h2>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Status</th>
+        <th>Mechanik</th>
+        <th>Data przyjęcia</th>
+        <th>Akcje</th>
+    </tr>
+
+    {% for z in zlecenia_roweru %}
+    <tr>
+        <td>#{{ z.id }}</td>
+        <td><span class="badge">{{ z.status }}</span></td>
+        <td>{{ z.mechanik|default:"-" }}</td>
+        <td>{{ z.data_przyjecia }}</td>
+        <td>
+            <a href="{% url 'szczegoly_zlecenia' z.id %}" class="btn">Zlecenie</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="5">Brak zleceń dla tego roweru.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

@@ -13,9 +13,13 @@ urlpatterns = [
 
     path('rowery/', views.rowery, name='rowery'),
     path('rowery/dodaj/', views.dodaj_rower, name='dodaj_rower'),
+    path('rowery/<int:rower_id>/edytuj/', views.edytuj_rower, name='edytuj_rower'),
+    path('rowery/<int:rower_id>/', views.szczegoly_roweru, name='szczegoly_roweru'),
 
     path('zgloszenia/', views.zgloszenia, name='zgloszenia'),
     path('zgloszenia/dodaj/', views.dodaj_zgloszenie, name='dodaj_zgloszenie'),
+    path('zgloszenia/<int:zgloszenie_id>/edytuj/', views.edytuj_zgloszenie, name='edytuj_zgloszenie'),
+    path('zgloszenia/<int:zgloszenie_id>/', views.szczegoly_zgloszenia, name='szczegoly_zgloszenia'),
 
     path('czesci/', views.czesci, name='czesci'),
     path('czesci/dodaj/', views.dodaj_czesc, name='dodaj_czesc'),
