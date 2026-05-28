@@ -164,6 +164,7 @@ class Powiadomienie(models.Model):
     zlecenie = models.ForeignKey(ZlecenieSerwisowe, on_delete=models.CASCADE, related_name='powiadomienia')
     tresc = models.TextField()
     data_wyslania = models.DateTimeField(auto_now_add=True)
+    czy_odczytane = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Powiadomienie"

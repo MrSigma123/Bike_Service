@@ -846,14 +846,27 @@ def dodaj_platnosc(request):
         form = PlatnoscForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            platnosc = form.save()
+
+            klient = platnosc.zlecenie.zgloszenie.klient
+
+            Powiadomienie.objects.create(
+                uzytkownik=klient,
+                zlecenie=platnosc.zlecenie,
+                tresc=f'Dodano płatność do zlecenia #{platnosc.zlecenie.id} na kwotę {platnosc.kwota} zł.'
+            )
+
             messages.success(request, 'Płatność została dodana.')
-            return redirect('platnosci')
+            return redirect('szczegoly_platnosci', platnosc_id=platnosc.id)
     else:
         form = PlatnoscForm()
 
-    return render(request, 'dodaj_platnosc.html', {'form': form})
-    
+    return render(request, 'formularz.html', {
+        'form': form,
+        'tytul': 'Dodaj płatność',
+        'przycisk': 'Zapisz płatność',
+        'powrot_url': reverse('platnosci'),
+    })    
 @login_required
 def dodaj_pozycje_zamowienia(request):
     if not wymagaj_roli(request, ['magazynier', 'admin'], 'Tylko magazynier lub admin może dodawać pozycje zamówienia.'):
