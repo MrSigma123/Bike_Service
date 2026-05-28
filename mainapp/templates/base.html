@@ -662,65 +662,58 @@
                 </div>
             </div>
 
-            <nav>
-                <a href="{% url 'home' %}">Strona główna</a>
+            			<nav>
+			    <a href="{% url 'home' %}">Strona główna</a>
 
-                {% if user.is_authenticated and uzytkownik_aplikacji %}
-                    <a href="{% url 'moje_dane' %}">Moje dane</a>
+			    {% if user.is_authenticated and uzytkownik_aplikacji %}
 
-                    {% if uzytkownik_aplikacji.rola == 'klient' %}
-                        <a href="{% url 'panel_klienta' %}">Panel klienta</a>
-                        <a href="{% url 'rowery' %}">Moje rowery</a>
-                        <a href="{% url 'zgloszenia' %}">Moje zgłoszenia</a>
-                        <a href="{% url 'powiadomienia' %}">Powiadomienia</a>
-                    {% elif uzytkownik_aplikacji.rola == 'mechanik' %}
-                        <a href="{% url 'panel_mechanika' %}">Panel mechanika</a>
-                        <a href="{% url 'zlecenia' %}">Zlecenia</a>
-                        <a href="{% url 'zgloszenia' %}">Zgłoszenia</a>
-                        <a href="{% url 'czesci' %}">Części</a>
-                        <a href="{% url 'powiadomienia' %}">Powiadomienia</a>
-                    {% elif uzytkownik_aplikacji.rola == 'magazynier' %}
-                        <a href="{% url 'panel_magazyniera' %}">Panel magazyniera</a>
-                        <a href="{% url 'czesci' %}">Części</a>
-                        <a href="{% url 'zamowienia_czesci' %}">Zamówienia części</a>
-                    {% elif uzytkownik_aplikacji.rola == 'admin' %}
-                        <a href="{% url 'panel_admin' %}">Panel admina</a>
-                        <a href="{% url 'rowery' %}">Rowery</a>
-                        <a href="{% url 'zgloszenia' %}">Zgłoszenia</a>
-                        <a href="{% url 'czesci' %}">Części</a>
-                        <a href="{% url 'powiadomienia' %}">Powiadomienia</a>
-                    {% endif %}
+			        {% if uzytkownik_aplikacji.rola == 'klient' %}
+			            <a href="{% url 'panel_klienta' %}">Panel klienta</a>
+			        {% elif uzytkownik_aplikacji.rola == 'mechanik' %}
+			            <a href="{% url 'panel_mechanika' %}">Panel mechanika</a>
+			        {% elif uzytkownik_aplikacji.rola == 'magazynier' %}
+			            <a href="{% url 'panel_magazyniera' %}">Panel magazyniera</a>
+			        {% elif uzytkownik_aplikacji.rola == 'admin' %}
+			            <a href="{% url 'panel_admin' %}">Panel admina</a>
+			        {% endif %}
 
-                {% endif %}
-                
-                {% if user.is_authenticated and uzytkownik_aplikacji %}
-                    <div class="user-box">
-                        <span class="user-label">
-                            Zalogowano jako: <strong>{{ user.username }}</strong>
-                            — {{ uzytkownik_aplikacji.get_rola_display }}
-                        </span>
+			        <a href="{% url 'powiadomienia' %}">Powiadomienia</a>
+			        <a href="{% url 'moje_dane' %}">Moje dane</a>
 
-                        <form method="post" action="{% url 'logout' %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="nav-button">Wyloguj</button>
-                        </form>
-                    </div>
-                {% elif user.is_authenticated and not uzytkownik_aplikacji %}
-                    <div class="user-box">
-                        <span class="user-label">Zalogowano jako: <strong>{{ user.username }}</strong></span>
+			        <div class="user-box">
+			            <span class="user-label">
+			                Zalogowano jako: <strong>{{ user.username }}</strong>
+			                — {{ uzytkownik_aplikacji.get_rola_display }}
+			            </span>
 
-                        <form method="post" action="{% url 'logout' %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="nav-button">Wyloguj</button>
-                        </form>
-                    </div>
-                {% else %}
-                    <div class="user-box">
-                        <a href="{% url 'login' %}">Logowanie</a>
-                        <a href="{% url 'rejestracja' %}">Rejestracja</a>
-                    </div>
-                {% endif %}
-            </nav>
+			            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+			                {% csrf_token %}
+			                <button type="submit" class="nav-button">Wyloguj</button>
+			            </form>
+			        </div>
+
+			    {% elif user.is_authenticated and not uzytkownik_aplikacji %}
+
+			        <div class="user-box">
+			            <span class="user-label">
+			                Zalogowano jako: <strong>{{ user.username }}</strong>
+			            </span>
+
+			            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+			                {% csrf_token %}
+			                <button type="submit" class="nav-button">Wyloguj</button>
+			            </form>
+			        </div>
+
+			    {% else %}
+
+			        <div class="user-box">
+			            <a href="{% url 'login' %}">Logowanie</a>
+			            <a href="{% url 'rejestracja' %}">Rejestracja</a>
+			        </div>
+
+			    {% endif %}
+			</nav>
         </div>
     </header>
 
