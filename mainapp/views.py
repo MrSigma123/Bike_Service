@@ -747,6 +747,10 @@ def zmien_status(request, zlecenie_id):
     zlecenie = get_object_or_404(ZlecenieSerwisowe, id=zlecenie_id)
     uzytkownik = pobierz_uzytkownika_aplikacji(request)
 
+    if uzytkownik is None:
+        messages.error(request, 'Brak profilu użytkownika aplikacji.')
+        return redirect('home')
+
     if uzytkownik.rola == 'mechanik' and zlecenie.mechanik != uzytkownik:
         messages.error(request, 'Nie możesz zmienić statusu zlecenia przypisanego do innego mechanika.')
         return redirect('zlecenia')
@@ -758,19 +762,22 @@ def zmien_status(request, zlecenie_id):
             nowy_status = form.cleaned_data['status']
             komentarz = form.cleaned_data.get('komentarz') or f'Status zlecenia zmieniono na: {nowy_status}.'
 
-            zmien_status_zlecenia(
-                zlecenie,
+            zmien_status_zlecenia_przez_procedure(
+                zlecenie.id,
                 nowy_status,
                 komentarz
             )
 
-            messages.success(request, 'Status zlecenia został zmieniony.')
+            messages.success(request, 'Status zlecenia został zmieniony przez procedurę PostgreSQL.')
             return redirect('szczegoly_zlecenia', zlecenie_id=zlecenie.id)
     else:
         form = StatusZleceniaForm(instance=zlecenie)
 
-    return render(request, 'zmien_status.html', {'form': form, 'zlecenie': zlecenie})
-    
+    return render(request, 'zmien_status.html', {
+        'form': form,
+        'zlecenie': zlecenie,
+    })
+
 @login_required
 def moje_dane(request):
     uzytkownik = pobierz_uzytkownika_aplikacji(request)
@@ -1117,3 +1124,10 @@ def oblicz_koszt_czesci_z_bazy(zlecenie_id):
 
     return wynik[0]
     
+def zmien_status_zlecenia_przez_procedure(zlecenie_id, nowy_status, komentarz):
+    with transaction.atomic():
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "CALL zmien_status_zlecenia_sql(%s, %s, %s)",
+                [zlecenie_id, nowy_status, komentarz]
+            )
