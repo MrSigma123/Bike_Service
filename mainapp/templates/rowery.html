@@ -31,7 +31,7 @@
     {% for rower in rowery %}
     <tr>
         <td>
-            <a href="{% url 'szczegoly_roweru' rower.id %}">
+            <a>
                 {{ rower }}
             </a>
         </td>
@@ -42,10 +42,6 @@
         <td>{{ rower.klient }}</td>
         <td>
             <a href="{% url 'szczegoly_roweru' rower.id %}" class="btn">Szczegóły</a>
-
-            {% if uzytkownik_aplikacji.rola == 'admin' or rower.klient == uzytkownik_aplikacji %}
-                <a href="{% url 'edytuj_rower' rower.id %}" class="btn">Edytuj</a>
-            {% endif %}
         </td>
     </tr>
     {% empty %}

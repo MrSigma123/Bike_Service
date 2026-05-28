@@ -43,10 +43,6 @@
         <td>{{ z.data_zgloszenia|default:"-" }}</td>
         <td>
             <a href="{% url 'szczegoly_zgloszenia' z.id %}" class="btn">Szczegóły</a>
-
-            {% if uzytkownik_aplikacji.rola == 'admin' or z.klient == uzytkownik_aplikacji %}
-                <a href="{% url 'edytuj_zgloszenie' z.id %}" class="btn">Edytuj</a>
-            {% endif %}
         </td>
     </tr>
     {% empty %}
