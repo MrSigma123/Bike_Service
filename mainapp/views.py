@@ -1614,3 +1614,68 @@ def edytuj_platnosc(request, platnosc_id):
         'powrot_url': reverse('szczegoly_platnosci', args=[platnosc.id]),
     })
     
+@login_required
+def usun_zamowienie_czesci(request, zamowienie_id):
+    if not wymagaj_roli(request, ['magazynier', 'admin'], 'Tylko magazynier lub admin może usuwać zamówienia części.'):
+        return redirect('home')
+
+    zamowienie = get_object_or_404(ZamowienieCzesci, id=zamowienie_id)
+
+    if request.method == 'POST':
+        zamowienie.delete()
+        messages.success(request, 'Zamówienie części zostało usunięte.')
+        return redirect('zamowienia_czesci')
+
+    return render(request, 'potwierdz_usuniecie.html', {
+        'tytul': f'Usuń zamówienie części #{zamowienie.id}',
+        'obiekt': zamowienie,
+        'powrot_url': reverse('zamowienia_czesci'),
+    })
+    
+@login_required
+def usun_zlecenie(request, zlecenie_id):
+    if not wymagaj_roli(request, ['admin'], 'Tylko administrator może usuwać zlecenia.'):
+        return redirect('home')
+
+    zlecenie = get_object_or_404(ZlecenieSerwisowe, id=zlecenie_id)
+
+    if request.method == 'POST':
+        zlecenie.delete()
+        messages.success(request, 'Zlecenie zostało usunięte.')
+        return redirect('zlecenia')
+
+    return render(request, 'potwierdz_usuniecie.html', {
+        'tytul': f'Usuń zlecenie #{zlecenie.id}',
+        'obiekt': zlecenie,
+        'powrot_url': reverse('szczegoly_zlecenia', args=[zlecenie.id]),
+    })
+    
+@login_required
+def dezaktywuj_uzytkownika(request, uzytkownik_id):
+    if not wymagaj_roli(request, ['admin'], 'Tylko administrator może dezaktywować użytkowników.'):
+        return redirect('home')
+
+    profil = get_object_or_404(Uzytkownik, id=uzytkownik_id)
+
+    if profil.login == request.user.username:
+        messages.error(request, 'Nie możesz dezaktywować własnego konta.')
+        return redirect('szczegoly_uzytkownika', uzytkownik_id=profil.id)
+
+    konto = User.objects.filter(username=profil.login).first()
+
+    if request.method == 'POST':
+        if konto:
+            konto.is_active = False
+            konto.save()
+            messages.success(request, 'Konto logowania użytkownika zostało dezaktywowane.')
+        else:
+            messages.warning(request, 'Nie znaleziono konta logowania Django dla tego profilu.')
+
+        return redirect('uzytkownicy_aplikacji')
+
+    return render(request, 'potwierdz_usuniecie.html', {
+        'tytul': f'Dezaktywuj użytkownika: {profil}',
+        'obiekt': profil,
+        'powrot_url': reverse('szczegoly_uzytkownika', args=[profil.id]),
+    })
+    

@@ -73,6 +73,7 @@
 
             {% if uzytkownik_aplikacji.rola == 'admin' %}
                 <a href="{% url 'edytuj_zlecenie' z.id %}" class="btn">Edytuj</a>
+                <a href="{% url 'usun_zlecenie' z.id %}" class="btn">Usuń</a>
             {% endif %}
         </td>
     </tr>

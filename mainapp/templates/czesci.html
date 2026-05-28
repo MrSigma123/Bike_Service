@@ -23,9 +23,7 @@
     {% for czesc in czesci %}
     <tr>
         <td>
-            <a href="{% url 'szczegoly_czesci' czesc.id %}">
-                {{ czesc.nazwa }}
-            </a>
+            {{ czesc.nazwa }}
         </td>
         <td>{{ czesc.stan_magazynowy }}</td>
         <td>{{ czesc.cena }} zł</td>

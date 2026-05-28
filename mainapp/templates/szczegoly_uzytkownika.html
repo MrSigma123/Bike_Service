@@ -9,14 +9,18 @@
 <div class="actions">
     <a href="{% url 'edytuj_uzytkownika_aplikacji' profil.id %}" class="btn">Edytuj profil</a>
     <a href="{% url 'uzytkownicy_aplikacji' %}" class="btn btn-secondary">Powrót do listy</a>
+
+    {% if profil.login != user.username %}
+        <a href="{% url 'dezaktywuj_uzytkownika' profil.id %}" class="btn">Dezaktywuj konto</a>
+    {% endif %}
 </div>
 
 <div class="stats">
     <div class="card">
         <h3>Dane podstawowe</h3>
-        <p>Email: {{ profil.email }}</p>
-        <p>Login: {{ profil.login }}</p>
-        <p>Rola: <span class="badge">{{ profil.get_rola_display }}</span></p>
+        <p><strong>Email:</strong> {{ profil.email }}</p>
+        <p><strong>Login:</strong> {{ profil.login }}</p>
+        <p><strong>Rola:</strong> <span class="badge">{{ profil.get_rola_display }}</span></p>
     </div>
 
     <div class="card">
@@ -35,9 +39,9 @@
     <div class="card">
         <h3>Kontakt</h3>
         {% if kontakt %}
-            <p>Telefon: {{ kontakt.telefon }}</p>
-            <p>Dodatkowy email: {{ kontakt.dodatkowy_email }}</p>
-            <p>Preferowany kontakt: {{ kontakt.preferowany_kontakt }}</p>
+            <p><strong>Telefon:</strong> {{ kontakt.telefon }}</p>
+            <p><strong>Dodatkowy email:</strong> {{ kontakt.dodatkowy_email }}</p>
+            <p><strong>Preferowany kontakt:</strong> {{ kontakt.preferowany_kontakt }}</p>
         {% else %}
             <p>Brak kontaktu.</p>
         {% endif %}
@@ -45,49 +49,59 @@
 </div>
 
 {% if profil.rola == 'klient' %}
-    <h3>Rowery klienta</h3>
+    <h2 class="section-title">Rowery klienta</h2>
 
     <table>
         <tr>
             <th>Rower</th>
             <th>Numer seryjny</th>
+            <th>Akcje</th>
         </tr>
 
         {% for r in rowery %}
         <tr>
             <td>{{ r }}</td>
             <td>{{ r.numer_seryjny }}</td>
+            <td>
+                <a href="{% url 'szczegoly_roweru' r.id %}" class="btn">Szczegóły</a>
+                <a href="{% url 'edytuj_rower' r.id %}" class="btn">Edytuj</a>
+            </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="2">Brak rowerów.</td>
+            <td colspan="3">Brak rowerów.</td>
         </tr>
         {% endfor %}
     </table>
 
-    <h3>Zgłoszenia klienta</h3>
+    <h2 class="section-title">Zgłoszenia klienta</h2>
 
     <table>
         <tr>
             <th>Opis</th>
             <th>Status</th>
+            <th>Akcje</th>
         </tr>
 
         {% for z in zgloszenia %}
         <tr>
             <td>{{ z.opis_usterki }}</td>
             <td><span class="badge">{{ z.status }}</span></td>
+            <td>
+                <a href="{% url 'szczegoly_zgloszenia' z.id %}" class="btn">Szczegóły</a>
+                <a href="{% url 'edytuj_zgloszenie' z.id %}" class="btn">Edytuj</a>
+            </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="2">Brak zgłoszeń.</td>
+            <td colspan="3">Brak zgłoszeń.</td>
         </tr>
         {% endfor %}
     </table>
 {% endif %}
 
 {% if profil.rola == 'mechanik' %}
-    <h3>Zlecenia mechanika</h3>
+    <h2 class="section-title">Zlecenia mechanika</h2>
 
     <table>
         <tr>

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Potwierdzenie usunięcia{% endblock %}
+
+{% block content %}
+
+<h2>{{ tytul }}</h2>
+
+<p>
+    Czy na pewno chcesz usunąć ten element?
+</p>
+
+<div class="card">
+    <h3>{{ obiekt }}</h3>
+    <p>
+        Tej operacji nie należy wykonywać przypadkowo. Usunięcie może wpłynąć
+        na dane powiązane z tym elementem.
+    </p>
+</div>
+
+<form method="post" class="actions">
+    {% csrf_token %}
+    <button type="submit" class="btn">Tak, usuń</button>
+    <a href="{{ powrot_url }}" class="btn btn-secondary">Anuluj</a>
+</form>
+
+{% endblock %}

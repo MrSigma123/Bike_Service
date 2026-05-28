@@ -43,6 +43,7 @@ urlpatterns = [
     path('zamowienia-czesci/dodaj/', views.dodaj_zamowienie_czesci, name='dodaj_zamowienie_czesci'),
     path('pozycje-zamowienia/dodaj/', views.dodaj_pozycje_zamowienia, name='dodaj_pozycje_zamowienia'),
     path('zamowienia-czesci/<int:zamowienie_id>/', views.szczegoly_zamowienia_czesci, name='szczegoly_zamowienia_czesci'),
+    path('zamowienia-czesci/<int:zamowienie_id>/usun/', views.usun_zamowienie_czesci, name='usun_zamowienie_czesci'),
     
     path('powiadomienia/', views.powiadomienia, name='powiadomienia'),
     
@@ -59,6 +60,7 @@ urlpatterns = [
     path('zlecenia/<int:zlecenie_id>/termin/dodaj/', views.dodaj_termin_serwisu, name='dodaj_termin_serwisu'),
     path('zlecenia/<int:zlecenie_id>/usluga/dodaj/', views.dodaj_wykonana_usluga, name='dodaj_wykonana_usluga'),
     path('zlecenia/<int:zlecenie_id>/edytuj/', views.edytuj_zlecenie, name='edytuj_zlecenie'),
+    path('zlecenia/<int:zlecenie_id>/usun/', views.usun_zlecenie, name='usun_zlecenie'),
     
     path('diagnozy/', views.diagnozy, name='diagnozy'),
     path('raporty/', views.raporty, name='raporty'),
@@ -87,4 +89,5 @@ urlpatterns = [
     path('platnosci/<int:platnosc_id>/', views.szczegoly_platnosci, name='szczegoly_platnosci'),
     path('platnosci/<int:platnosc_id>/edytuj/', views.edytuj_platnosc, name='edytuj_platnosc'),
     
+    path('uzytkownicy/<int:uzytkownik_id>/dezaktywuj/', views.dezaktywuj_uzytkownika, name='dezaktywuj_uzytkownika'),
 ]
