@@ -15,10 +15,6 @@
     {% if uzytkownik_aplikacji.rola == 'magazynier' or uzytkownik_aplikacji.rola == 'admin' %}
         <a href="{% url 'dodaj_zamowienie_czesci' %}" class="btn">Dodaj zamówienie części</a>
     {% endif %}
-
-    {% if uzytkownik_aplikacji.rola == 'magazynier' or uzytkownik_aplikacji.rola == 'admin' %}
-        <a href="{% url 'usun_zamowienie_czesci' z.id %}" class="btn">Usuń</a>
-    {% endif %}
     
     <a href="{% url 'panel_magazyniera' %}" class="btn btn-secondary">Powrót do panelu magazyniera</a>
 </div>

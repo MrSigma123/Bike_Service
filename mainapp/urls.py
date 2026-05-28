@@ -43,7 +43,6 @@ urlpatterns = [
     path('zamowienia-czesci/dodaj/', views.dodaj_zamowienie_czesci, name='dodaj_zamowienie_czesci'),
     path('pozycje-zamowienia/dodaj/', views.dodaj_pozycje_zamowienia, name='dodaj_pozycje_zamowienia'),
     path('zamowienia-czesci/<int:zamowienie_id>/', views.szczegoly_zamowienia_czesci, name='szczegoly_zamowienia_czesci'),
-    path('zamowienia-czesci/<int:zamowienie_id>/usun/', views.usun_zamowienie_czesci, name='usun_zamowienie_czesci'),
     
     path('powiadomienia/', views.powiadomienia, name='powiadomienia'),
     

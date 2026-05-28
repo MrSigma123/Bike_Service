@@ -1615,24 +1615,6 @@ def edytuj_platnosc(request, platnosc_id):
     })
     
 @login_required
-def usun_zamowienie_czesci(request, zamowienie_id):
-    if not wymagaj_roli(request, ['magazynier', 'admin'], 'Tylko magazynier lub admin może usuwać zamówienia części.'):
-        return redirect('home')
-
-    zamowienie = get_object_or_404(ZamowienieCzesci, id=zamowienie_id)
-
-    if request.method == 'POST':
-        zamowienie.delete()
-        messages.success(request, 'Zamówienie części zostało usunięte.')
-        return redirect('zamowienia_czesci')
-
-    return render(request, 'potwierdz_usuniecie.html', {
-        'tytul': f'Usuń zamówienie części #{zamowienie.id}',
-        'obiekt': zamowienie,
-        'powrot_url': reverse('zamowienia_czesci'),
-    })
-    
-@login_required
 def anuluj_zlecenie(request, zlecenie_id):
     if not wymagaj_roli(request, ['admin'], 'Tylko administrator może anulować zlecenia.'):
         return redirect('home')
