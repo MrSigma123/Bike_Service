@@ -18,8 +18,8 @@
             {% if user.is_authenticated %}
                 <div class="hero-buttons">
                     <a href="{% url 'rowery' %}" class="btn">Przegląd rowerów</a>
-                    <a href="{% url 'zgloszenia' %}" class="btn secondary">Zgłoszenia</a>
-                    <a href="{% url 'czesci' %}" class="btn secondary">Części</a>
+                    <a href="{% url 'zgloszenia' %}" class="btn">Zgłoszenia</a>
+                    <a href="{% url 'czesci' %}" class="btn">Części</a>
                 </div>
             {% else %}
                 <div class="hero-buttons">
