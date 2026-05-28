@@ -447,9 +447,32 @@ class UzytkownikProfilForm(forms.ModelForm):
         return validate_person_name(self.cleaned_data.get('nazwisko', ''), 'Nazwisko')
         
 class ZlecenieSerwisoweEditForm(forms.ModelForm):
+    mechanik = forms.ModelChoiceField(
+        queryset=Uzytkownik.objects.none(),
+        required=False,
+        label='Mechanik',
+        empty_label='Brak przypisanego mechanika'
+    )
+
     class Meta:
         model = ZlecenieSerwisowe
         fields = ['mechanik']
-        labels = {
-            'mechanik': 'Mechanik',
-        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['mechanik'].queryset = Uzytkownik.objects.filter(
+            rola='mechanik'
+        ).order_by('nazwisko', 'imie', 'login')
+
+        self.fields['mechanik'].label_from_instance = (
+            lambda obj: f'{obj.imie} {obj.nazwisko} ({obj.login})'
+        )
+
+    def clean_mechanik(self):
+        mechanik = self.cleaned_data.get('mechanik')
+
+        if mechanik is not None and mechanik.rola != 'mechanik':
+            raise forms.ValidationError('Do zlecenia można przypisać tylko użytkownika z rolą mechanika.')
+
+        return mechanik
